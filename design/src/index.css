@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --paper: #0A0D12;
+    --ink: #EDE7DC;
+    --ash: #8B9199;
+    --rust: #A98B69;
+    --bone: #141A22;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Geist', system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    color-scheme: dark;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  #root {
+    position: relative;
+  }
+
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background: var(--rust);
+    color: var(--paper);
+  }
+
+  /* Hide the native scrollbar - we render our own (see Scrollbar.jsx).
+     Lenis still drives real scroll position underneath. */
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom cursor takeover. Applied by Cursor.jsx only when fine pointer +
+     no reduced-motion. Touch / reduced-motion users keep the system cursor. */
+  html.cursor-hidden,
+  html.cursor-hidden * {
+    cursor: none !important;
+  }
+  html.cursor-hidden input,
+  html.cursor-hidden textarea,
+  html.cursor-hidden [contenteditable="true"] {
+    cursor: text !important;
+  }
+}
+
+@layer utilities {
+  .grain::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    /* Stronger film grain with animated flicker and slow pan for life. */
+    opacity: 0.14;
+    mix-blend-mode: overlay;
+    filter: contrast(1) saturate(0.98);
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 220% 220%;
+    /* Static grain only — animation removed to keep texture still. */
+  }
+
+  /* Subtle paper/fiber overlay on top of the grain to add depth. Kept very
+     faint to avoid interfering with legibility. */
+  .grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.08;
+    mix-blend-mode: multiply;
+    background-image: radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.02) 0%, transparent 12%), radial-gradient(ellipse at 80% 90%, rgba(0,0,0,0.04) 0%, transparent 18%);
+    background-repeat: repeat;
+  }
+
+  @keyframes grainFlicker {
+    0% { opacity: 0.12; }
+    18% { opacity: 0.18; }
+    36% { opacity: 0.14; }
+    54% { opacity: 0.20; }
+    72% { opacity: 0.13; }
+    100% { opacity: 0.16; }
+  }
+
+  @keyframes grainPan {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 100%; }
+  }
+
+  /* Top-level app grain overlay to ensure visibility regardless of
+     stacking contexts. Placed above everything but below UI chrome like
+     transitions which intentionally use higher z-indexes. */
+  .app-grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.16;
+    mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 180% 180%;
+    /* Static grain only — animation removed to keep texture still. */
+  }
+
+  /* Curtain grain layer: a callable grain element that can be animated
+     with GSAP. Used by the page transition so the curtain shows moving
+     film-like grain while the wipe runs. */
+  .curtain-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    filter: contrast(1.05) saturate(0.98);
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.25' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 180% 180%;
+  }
+
+  .marquee-track {
+    animation: marquee 40s linear infinite;
+    display: inline-flex;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--rust);
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(169, 139, 105, 0.5);
+    animation: pulse 2.4s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(169, 139, 105, 0.42); }
+    70% { box-shadow: 0 0 0 8px rgba(169, 139, 105, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(169, 139, 105, 0); }
+  }
+
+  .hairline {
+    /* Hairlines are now light-on-dark. */
+    border-color: rgba(236, 237, 231, 0.14);
+  }
+
+  .cloud-bg {
+    /* Volumetric cloud background effect */
+    background: linear-gradient(
+      135deg,
+      rgba(123, 164, 199, 0.08) 0%,
+      rgba(123, 164, 199, 0.04) 20%,
+      rgba(169, 139, 105, 0.03) 50%,
+      rgba(123, 164, 199, 0.04) 80%,
+      rgba(123, 164, 199, 0.08) 100%
+    );
+    backdrop-filter: blur(1px);
+  }
+
+  @keyframes cloudDrift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 2% 1%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  .cloud-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(ellipse 800px 200px at 20% 50%, rgba(123, 164, 199, 0.06), transparent),
+      radial-gradient(ellipse 600px 300px at 80% 30%, rgba(123, 164, 199, 0.04), transparent);
+    background-size: 200% 200%;
+    animation: cloudDrift 30s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+}
