@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://developer.coehemang.dev/</loc><priority>1.0</priority></url>
+  <url><loc>https://developer.coehemang.dev/projects/typereal</loc><priority>0.8</priority></url>
+  <url><loc>https://developer.coehemang.dev/projects/formdash</loc><priority>0.8</priority></url>
+  <url><loc>https://developer.coehemang.dev/projects/quizzy</loc><priority>0.8</priority></url>
+  <url><loc>https://developer.coehemang.dev/projects/animy</loc><priority>0.8</priority></url>
+  <url><loc>https://developer.coehemang.dev/projects/build-my-own-git</loc><priority>0.8</priority></url>
+</urlset>

@@ -18,8 +18,13 @@
     <meta name="twitter:description" content="Backend systems, ML pipelines, and the occasional weird side-project." />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <!-- Inter is loaded off the critical path: preconnect (crossorigin, so the
+         connection is reused for the woff2 font files), then load the CSS async
+         via rel=preload->stylesheet. The system-font fallback paints instantly
+         and swaps to Inter when ready, so fonts no longer block first paint. -->
+    <link rel="preconnect" href="https://rsms.me/" crossorigin />
+    <link rel="preload" as="style" href="https://rsms.me/inter/inter.css" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://rsms.me/inter/inter.css" /></noscript>
     <title>Hemang Choudhary - Engineer</title>
   </head>
   <body>
