@@ -8,6 +8,8 @@ import { ModeToggle } from './components/ModeToggle.jsx';
 import { Mode3D } from './components/Mode3D.jsx';
 import { StoryButton } from './components/StoryButton.jsx';
 import { StoryMode } from './components/StoryMode.jsx';
+import { WorldButton } from './components/WorldButton.jsx';
+import { WorldMode } from './components/WorldMode.jsx';
 import { LightboxProvider } from './components/LightboxProvider.jsx';
 import { useThemeShortcut } from './useThemeShortcut.js';
 import { useLenis } from './useLenis.js';
@@ -40,12 +42,14 @@ export default function App() {
       <div className="floating-toolbar floating-toolbar--center">
         <ModeToggle />
         <StoryButton />
+        <WorldButton />
       </div>
       <div className="floating-toolbar floating-toolbar--right">
         <ThemeToggle />
       </div>
       <Mode3D />
       <StoryMode />
+      <WorldMode />
     </LightboxProvider>
   );
 }

@@ -1,0 +1,372 @@
+/* ============================================================
+   World Mode - an infinite canvas of photographs. A flat,
+   pannable / zoomable plane (Figma-style) holding a virtualized
+   grid of framed photos over a faint dot grid, so it always
+   reads as a surface and never as a void. The rAF loop in
+   WorldSpace.jsx drives the surface transform and dot grid; the
+   visible cells are recomputed only when the view range changes.
+   Toggled by `world-mode` on <html> (see useWorldMode.js).
+   ============================================================ */
+.world-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 910;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease-out-quint);
+}
+.world-overlay[data-open="true"] { opacity: 1; pointer-events: auto; }
+
+/* Hide the page chrome that would otherwise float over the world. */
+.world-mode .scroll-progress { display: none; }
+.world-mode .floating-toolbar {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  pointer-events: none;
+}
+.world-mode .floating-toolbar--center { transform: translate(-50%, 16px); }
+.world-mode #oneko,
+.world-mode #oneko-bubble { display: none !important; }
+html.world-mode, html.world-mode body { overflow: hidden; }
+
+.world-exit { position: fixed; top: var(--gap); right: var(--gap); z-index: 950; }
+
+/* ---- The canvas ---- */
+.world { position: absolute; inset: 0; overflow: hidden; }
+.world-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* The whole canvas bows gently into a sphere - this perspective is what makes
+     the per-cell Z/rotation (written in WorldSpace.jsx) read as a globe. */
+  perspective: 1600px;
+  perspective-origin: 50% 50%;
+  /* Figma-style dot grid; size + position are driven by the loop so it pans
+     and zooms in lock-step with the photos. */
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, color-mix(in oklab, var(--fg) 14%, transparent) 1.1px, transparent 1.6px);
+  background-repeat: repeat;
+}
+.world-canvas.is-grabbing { cursor: grabbing; }
+
+.world-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;  /* lets each cell sit at its own depth */
+  will-change: transform;
+}
+
+.world-cell {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  perspective: 900px;            /* gives the inner card real depth on tilt */
+  transform-origin: center center;
+  -webkit-tap-highlight-color: transparent;
+}
+.world-cell:focus { outline: none; }
+.world-cell-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--inline-radius);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--shadow-card);
+  transform-style: preserve-3d;
+  /* Pre-promote to its own layer so the hover blur/lift never has to spin one
+     up mid-interaction (that promotion was the flash). */
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  /* --rx / --ry are written by the cursor-tilt handler in WorldSpace.jsx */
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    transform 160ms var(--ease-out-quint),
+    box-shadow 240ms var(--ease-out-quint),
+    border-color 240ms var(--ease-out-quint),
+    filter 240ms var(--ease-out-quint),
+    opacity 240ms var(--ease-out-quint);
+}
+/* Hover: tilt toward the cursor + lift toward the viewer (the 3D feel). */
+.world-cell:hover .world-cell-inner,
+.world-cell:focus-visible .world-cell-inner {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(44px) scale(1.04);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--accent);
+}
+/* Depth of field: when one photo is hovered, the rest ease gently out of
+   focus. Kept subtle so moving between photos doesn't wash the screen. */
+.world-surface:has(.world-cell:hover) .world-cell:not(:hover) .world-cell-inner {
+  filter: blur(1.6px);
+  opacity: 0.82;
+}
+.world-cell img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* cell matches the photo's aspect, so this never crops */
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none; /* stop the native image ghost-drag fighting the pan */
+  pointer-events: none;    /* the button owns all pointer events, not the image */
+}
+
+/* Corner blur + vignette - blurs and darkens only the outer ring, so focus
+   stays on the centre of the globe and the edges melt away. */
+.world-fog {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background: radial-gradient(125% 115% at 50% 50%, transparent 58%, color-mix(in oklab, var(--bg) 62%, transparent) 100%);
+  -webkit-mask-image: radial-gradient(125% 115% at 50% 50%, transparent 50%, #000 86%);
+  mask-image: radial-gradient(125% 115% at 50% 50%, transparent 50%, #000 86%);
+}
+
+/* ---- Heads-up chrome ---- */
+.world-hud {
+  position: fixed;
+  top: var(--gap);
+  left: var(--gap);
+  z-index: 940;
+  pointer-events: none;
+}
+.world-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+.world-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--gray);
+  margin: 4px 0 0;
+}
+/* Frosted pills so the bottom chrome stays legible over any photo. */
+.world-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 940;
+  margin: 0;
+  max-width: min(40rem, calc(100vw - 1.5rem));
+  text-align: center;
+  padding: 7px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  pointer-events: none;
+}
+.world-readout {
+  position: fixed;
+  right: var(--gap);
+  bottom: 16px;
+  z-index: 940;
+  margin: 0;
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--fg);
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.world-readout-label {
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-right: 2px;
+}
+
+/* On touch devices there's no cursor or scroll-zoom - just drag + tap. */
+.world-hint-touch { display: none; }
+@media (hover: none), (pointer: coarse) {
+  .world-hint-fine { display: none; }
+  .world-hint-touch { display: inline; }
+}
+
+/* ---- Inspector ---- */
+.world-canvas.is-inspecting .world-surface {
+  filter: blur(6px);
+  opacity: 0.45;
+  pointer-events: none;
+  transition: filter 320ms var(--ease-out-quint), opacity 320ms var(--ease-out-quint);
+}
+.world-inspect {
+  position: fixed;
+  inset: 0;
+  z-index: 960;
+  display: grid;
+  place-items: center;
+  padding: var(--gap);
+}
+.world-inspect-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: color-mix(in oklab, var(--bg) 50%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: world-fade 240ms var(--ease-out-quint);
+}
+@keyframes world-fade { from { opacity: 0; } to { opacity: 1; } }
+.world-inspect-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(46rem, 92vw);
+  max-height: 88vh;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
+  padding: var(--gap);
+  animation: world-pop 320ms var(--ease-out-quint);
+}
+@keyframes world-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.world-inspect-stage {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  margin-bottom: var(--gap);
+}
+.world-inspect-stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 60vh;
+  border-radius: var(--inline-radius);
+  border: 1px solid var(--btn-border);
+  background: var(--lightest-gray);
+  user-select: none;
+}
+.world-inspect-caption {
+  margin: 0 0 var(--gap-half);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+.world-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--gap-half) var(--gap);
+  margin: 0;
+}
+.world-meta-grid div { display: flex; flex-direction: column; gap: 2px; }
+.world-meta-grid dt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+.world-meta-grid dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.world-meta-dim { color: var(--gray); }
+
+/* Inspector controls - reuse the recessed look via tokens. */
+.world-inspect-nav,
+.world-inspect-close {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  transition: color 180ms var(--ease-out-quint), box-shadow 180ms var(--ease-out-quint), border-color 180ms var(--ease-out-quint);
+}
+.world-inspect-nav:hover,
+.world-inspect-close:hover { color: var(--fg); border-color: var(--btn-border-hover); box-shadow: var(--btn-shadow-hover); }
+.world-inspect-nav:focus-visible,
+.world-inspect-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.world-inspect-nav {
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.world-inspect-prev { left: -56px; }
+.world-inspect-next { right: -56px; }
+.world-inspect-close {
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+@media (max-width: 720px) {
+  .world-inspect-prev { left: 6px; }
+  .world-inspect-next { right: 6px; }
+  .world-inspect-nav { background: color-mix(in oklab, var(--surface) 80%, transparent); }
+}
+
+.world-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--gap-half);
+  text-align: center;
+  padding: var(--gap);
+  color: var(--gray);
+}
+.world-empty code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-hint { animation: none; }
+  .world-cell-inner { transition: none; transform: none !important; }
+  .world-cell:hover .world-cell-inner,
+  .world-cell:focus-visible .world-cell-inner { transform: none !important; }
+  .world-surface:has(.world-cell:hover) .world-cell:not(:hover) .world-cell-inner { filter: none; opacity: 1; }
+}
