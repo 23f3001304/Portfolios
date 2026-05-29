@@ -1,0 +1,259 @@
+/* ============================================================
+   Story Mode - narrated illustrated vignettes. A vertical stack
+   of full-screen scenes; the active scene's prop animates in
+   while the guide's head narrates the beat from the corner.
+   Toggled by `story-mode` on <html> (see useStoryMode.js).
+   ============================================================ */
+.story-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 920;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease-out-quint);
+}
+.story-overlay[data-open="true"] { opacity: 1; pointer-events: auto; }
+
+.story-mode .scroll-progress { display: none; }
+.story-mode .floating-toolbar {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  pointer-events: none;
+}
+.story-mode #oneko,
+.story-mode #oneko-bubble { display: none !important; }
+html.story-mode, html.story-mode body { overflow: hidden; }
+
+.story-exit { position: fixed; top: var(--gap); right: var(--gap); z-index: 950; }
+
+/* Vertical scroller of full-screen scenes. */
+.story-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  background: radial-gradient(58% 40% at 78% -10%, color-mix(in oklab, var(--accent) 10%, var(--bg)), var(--bg) 70%);
+}
+.story-scroll::-webkit-scrollbar { display: none; }
+
+.story-section {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 8vh var(--gap) 16vh;
+}
+.story-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 42rem;
+}
+
+/* Prop: reveals on a wrapper, floats + glows on an inner element. */
+.story-prop {
+  width: clamp(170px, 24vw, 300px);
+  margin-bottom: var(--gap-double);
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(46px) scale(0.82);
+  transition:
+    opacity 640ms var(--ease-out-quint),
+    transform 720ms var(--ease-out-quint);
+}
+.story-section.is-active .story-prop { opacity: 1; transform: none; }
+.story-prop-fx { will-change: transform, filter; }
+.story-prop-fx svg { width: 100%; height: auto; display: block; overflow: visible; }
+.story-section.is-active .story-prop-fx {
+  animation: prop-float 5.5s ease-in-out infinite 0.6s;
+  filter: drop-shadow(0 14px 26px color-mix(in oklab, var(--accent) 26%, transparent));
+}
+@keyframes prop-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-14px) rotate(1deg); }
+}
+
+/* ---- Per-beat prop animations (only the active scene plays) ---- */
+.story-prop-fx [class*="p-"] { transform-box: fill-box; transform-origin: center; }
+
+/* books: graduation tassel swings */
+.story-prop-fx .p-tassel { transform-origin: 50% 0%; }
+.story-section.is-active .p-tassel { animation: tassel-swing 2.4s ease-in-out infinite; }
+@keyframes tassel-swing { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(16deg); } }
+
+/* laptop: lid opens once, sleepy zzz drift up */
+.story-prop-fx .p-lid { transform-origin: 50% 100%; transform: rotate(-58deg); }
+.story-section.is-active .p-lid { animation: lid-open 760ms var(--ease-out-quint) 220ms forwards; }
+@keyframes lid-open { from { transform: rotate(-58deg); } to { transform: rotate(0deg); } }
+.story-prop-fx .p-zzz { opacity: 0; }
+.story-section.is-active .p-zzz { animation: zzz-rise 2.8s ease-out infinite 800ms; }
+@keyframes zzz-rise { 0% { opacity: 0; transform: translateY(8px); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-26px); } }
+
+/* extrovert: speech bubbles pop in, staggered */
+.story-prop-fx .p-bub { transform: scale(0); opacity: 0; }
+.story-section.is-active .p-bub1 { animation: bub-pop 440ms var(--ease-out-quint) 220ms forwards; }
+.story-section.is-active .p-bub2 { animation: bub-pop 440ms var(--ease-out-quint) 540ms forwards; }
+@keyframes bub-pop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+/* fuel: the can fizzes */
+.story-prop-fx .p-fizz { opacity: 0; }
+.story-section.is-active .p-fizz { animation: fizz 1.8s ease-out infinite 300ms; }
+@keyframes fizz { 0% { opacity: 0; transform: translateY(10px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
+
+/* lazy: the couch cushion settles */
+.story-section.is-active .p-cushion { animation: cushion 4s ease-in-out infinite; }
+@keyframes cushion { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.96) translateY(3px); } }
+
+/* rig: fan spins, the heart beats */
+.story-section.is-active .p-fan { animation: spin 2.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.story-section.is-active .p-heart { animation: heartbeat 1.4s ease-in-out infinite; }
+@keyframes heartbeat { 0%, 100% { transform: scale(1); } 18% { transform: scale(1.22); } 34% { transform: scale(1); } 50% { transform: scale(1.16); } }
+
+/* forza: the race line streaks, music notes bounce */
+.story-section.is-active .p-race { animation: race-dash 0.7s linear infinite; }
+@keyframes race-dash { to { stroke-dashoffset: -34; } }
+.story-section.is-active .p-note { animation: note-bounce 1.2s ease-in-out infinite; }
+@keyframes note-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+/* soft: the screen flickers on, a tear drops */
+.story-section.is-active .p-screen { animation: flicker 3.4s ease-in-out infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 8% { opacity: 0.5; } 12% { opacity: 1; } 72% { opacity: 1; } 76% { opacity: 0.6; } 80% { opacity: 1; } }
+.story-prop-fx .p-tear { opacity: 0; }
+.story-section.is-active .p-tear { animation: tear-drop 3s ease-in infinite 1s; }
+@keyframes tear-drop { 0% { opacity: 0; transform: translateY(-6px); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(42px); } }
+
+.story-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--gap-half);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 520ms var(--ease-out-quint) 180ms, transform 520ms var(--ease-out-quint) 180ms;
+}
+.story-headline {
+  font-size: clamp(1.7rem, 4.4vw, 3rem);
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+  margin: 0;
+  max-width: 18ch;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 560ms var(--ease-out-quint) 280ms, transform 560ms var(--ease-out-quint) 280ms;
+}
+.story-section.is-active .story-kicker,
+.story-section.is-active .story-headline { opacity: 1; transform: none; }
+
+/* ---- The narrator: guide head + speech bubble, fixed to the corner ---- */
+.narrator {
+  position: fixed;
+  left: clamp(14px, 3vw, 44px);
+  bottom: clamp(14px, 3vh, 34px);
+  z-index: 930;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  max-width: min(36rem, 82vw);
+  pointer-events: none;
+}
+.narrator-head {
+  width: clamp(92px, 12vw, 148px);
+  flex: none;
+}
+.narrator-head .guide { transition: none; }
+.narrator-head .guide-bob { width: 100%; }
+.narrator-bubble {
+  position: relative;
+  margin-bottom: 22px;
+  min-width: 12rem;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  padding: var(--gap) var(--gap) var(--gap-half);
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
+  animation: bubble-in 320ms var(--ease-out-quint);
+}
+@keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.narrator-bubble::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  bottom: 16px;
+  width: 13px;
+  height: 13px;
+  background: var(--surface);
+  border-left: 1px solid var(--btn-border);
+  border-bottom: 1px solid var(--btn-border);
+  transform: rotate(45deg);
+}
+.narrator-text {
+  margin: 0;
+  font-size: clamp(0.92rem, 1.3vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--fg);
+  min-height: 3em;
+}
+.speech-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  background: var(--accent);
+  margin-left: 3px;
+  vertical-align: -2px;
+  opacity: 0;
+}
+.speech-caret[data-on="true"] { opacity: 1; animation: caret-blink 700ms step-end infinite; }
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+/* ---- Progress rail + scroll hint ---- */
+.story-rail {
+  position: fixed;
+  right: clamp(14px, 2vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 930;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.story-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: color-mix(in oklab, var(--fg) 24%, transparent);
+  transition: background 220ms, transform 220ms;
+}
+.story-dot.is-on { background: var(--accent); transform: scale(1.4); }
+.story-scrollhint {
+  position: fixed;
+  left: 50%; bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 930;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gray);
+  margin: 0;
+  transition: opacity 320ms;
+  animation: hint-pulse 2.4s ease-in-out infinite;
+}
+.story-scrollhint[data-hide="true"] { opacity: 0; }
+@keyframes hint-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.85; } }
+
+@media (max-width: 720px) {
+  .narrator { gap: 8px; bottom: 10px; }
+  .narrator-head { width: 76px; }
+  .narrator-bubble { min-width: 9rem; font-size: 0.86rem; }
+  .story-rail { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-prop, .story-kicker, .story-headline { transition: opacity 200ms linear; transform: none; }
+  .story-prop-fx, .story-prop-fx * { animation: none !important; }
+  .story-prop-fx .p-lid { transform: none; }
+  .story-prop-fx .p-bub, .story-prop-fx .p-zzz,
+  .story-prop-fx .p-fizz, .story-prop-fx .p-tear { opacity: 1; }
+  .story-scrollhint { animation: none; }
+}

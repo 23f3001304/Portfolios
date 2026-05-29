@@ -2,7 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
-import './styles.css';
+import { initTheme } from './theme.js';
+import './styles/index.css';
 
 /* Hidden hello for the curious */
 if (typeof window !== 'undefined' && !window.__signed) {
@@ -15,6 +16,9 @@ if (typeof window !== 'undefined' && !window.__signed) {
     big, small
   );
 }
+
+// Apply any stored theme before first paint so there's no flash of the wrong one.
+initTheme();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -1,0 +1,213 @@
+/* ============================================================
+   Project detail page - header, metric grid, prose sections,
+   figure placeholders, and prev/next nav.
+   ============================================================ */
+.proj { display: flex; flex-direction: column; gap: var(--small-gap); }
+
+.proj-header { display: flex; flex-direction: column; gap: var(--gap); }
+.proj-meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-half) var(--gap);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--gray);
+}
+.proj-meta-strip .kv { display: inline-flex; gap: 4px; }
+.proj-meta-strip .kv .k { opacity: 0.5; }
+.proj-meta-strip .kv .v { color: var(--fg); }
+.proj h1 {
+  font-size: 2.5rem;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+.proj .tagline {
+  font-size: 1.125rem;
+  color: var(--gray);
+  max-width: 36rem;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+.proj-stack { display: flex; flex-wrap: wrap; gap: var(--gap-half); }
+
+.proj-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+}
+.proj-metrics .metric-cell {
+  padding: var(--gap) var(--gap);
+  border-right: 1px solid var(--light-gray);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-quarter);
+  position: relative;
+}
+.proj-metrics .metric-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--fg) 1.5%, transparent), transparent 40%);
+  pointer-events: none;
+}
+.proj-metrics .metric-cell:last-child { border-right: none; }
+.proj-metrics .metric-cell .value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  position: relative;
+  z-index: 1;
+}
+.proj-metrics .metric-cell .unit {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray);
+}
+.proj-metrics .metric-cell .label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--gray);
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.proj-overview { display: flex; flex-direction: column; gap: var(--gap); }
+.proj-overview p { font-size: 1.0625rem; line-height: 1.6; }
+
+.proj-section {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--gap-double);
+  padding-top: var(--gap-double);
+  border-top: 1px solid var(--light-gray);
+}
+.proj-section .label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--gray);
+  letter-spacing: 0.08em;
+  padding-top: 0.3rem;
+}
+.proj-section .body { display: flex; flex-direction: column; gap: var(--gap); }
+.proj-section .body p { font-size: 1rem; line-height: 1.6; }
+
+/* Figure placeholder - quieter */
+.figure { display: flex; flex-direction: column; gap: var(--gap-half); margin-top: var(--gap-half); }
+.figure .frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--fg) 4%, transparent), transparent 70%),
+    var(--surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+  transition: border-color 220ms var(--ease-out-quint), transform 320ms var(--ease-out-quint);
+}
+.figure .frame:hover {
+  border-color: var(--btn-border-hover);
+  transform: translate3d(0, -2px, 0);
+}
+.figure .frame::before {
+  content: attr(data-kind);
+  position: absolute;
+  bottom: var(--gap-half);
+  right: var(--gap-half);
+  padding: 3px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--gray);
+  background: var(--bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 3px;
+}
+.figure .frame::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 1px dashed color-mix(in oklab, var(--gray) 60%, transparent);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+.figure .caption {
+  display: flex;
+  gap: var(--gap-half);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--gray);
+  letter-spacing: 0.02em;
+}
+.figure .caption .id { color: var(--accent); }
+
+/* Real screenshot - same framed, recessed treatment as the placeholder. */
+.figure .frame-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+  transition: border-color 220ms var(--ease-out-quint), transform 320ms var(--ease-out-quint);
+}
+.figure .frame-img:hover {
+  border-color: var(--btn-border-hover);
+  transform: translate3d(0, -2px, 0);
+}
+
+.proj-figma {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--gap-double);
+  padding-top: var(--gap-double);
+  border-top: 1px solid var(--light-gray);
+}
+.proj-figma .label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--gray);
+  letter-spacing: 0.08em;
+  padding-top: 0.3rem;
+}
+.proj-figma .frame { aspect-ratio: 16 / 10; }
+
+.proj-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--gap-double);
+  border-top: 1px solid var(--light-gray);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+.proj-nav a {
+  text-decoration: none;
+  color: var(--gray);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-half);
+  transition: color 200ms var(--ease-out-quint), transform 200ms var(--ease-out-quint);
+}
+.proj-nav a:hover { color: var(--fg); }
+.proj-nav .prev:hover { transform: translateX(-3px); }
+.proj-nav .next:hover { transform: translateX(3px); }

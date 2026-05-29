@@ -1,0 +1,307 @@
+/* ============================================================
+   Interactive controls - the tactile button primitive, the
+   floating toolbar, the ambient audio toggle, and the 3D
+   theme switch. All share the recessed-into-surface look.
+   ============================================================ */
+
+/* ============================================
+   Tactile button - the engineered-physical
+   primitive used by nav controls, palette
+   trigger, theme toggle, link chips.
+   ============================================ */
+.btn {
+  --btn-pad-y: 0.4rem;
+  --btn-pad-x: 0.7rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+  color: var(--gray);
+  background-color: var(--btn-bg);
+  background-image: var(--btn-sheen);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--inline-radius);
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--btn-shadow);
+  transition:
+    color 180ms var(--ease-out-quint),
+    background-color 180ms var(--ease-out-quint),
+    border-color 180ms var(--ease-out-quint),
+    box-shadow 200ms var(--ease-out-quint);
+}
+.btn:hover {
+  color: var(--fg);
+  background-color: var(--btn-bg-hover);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+.btn:active {
+  background-color: var(--btn-bg-active);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-active);
+}
+.btn:active .kbd {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn .kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  font-size: 0.65rem;
+  color: var(--gray);
+  background: var(--lighter-gray);
+  border-radius: 3px;
+  border: 1px solid var(--btn-border);
+}
+.btn-icon { padding: var(--btn-pad-y); }
+
+/* ============================================
+   Floating toolbar - anchors the theme switch
+   to the bottom-right of the viewport.
+   ============================================ */
+.floating-toolbar {
+  position: fixed;
+  bottom: var(--gap);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-half);
+  /* `backwards` (not `both`) so the entry animation only forces the start
+     state during the delay - after it ends, opacity/transform return to the
+     cascade, letting .story-mode / .mode-3d rules actually take effect. */
+  animation: ft-in 520ms var(--ease-out-quint) 200ms backwards;
+  /* Mode toggles use these instead of display:none, so the toolbar fades
+     in/out without re-triggering the entry animation. */
+  transition: opacity 320ms var(--ease-out-quint), transform 320ms var(--ease-out-quint);
+}
+.floating-toolbar--right { right: var(--gap); }
+.floating-toolbar--left  { left:  var(--gap); }
+.floating-toolbar--center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* The entry animation hard-codes translate3d - re-centre it for the center
+   group so the from-state slides up from the bottom-centre instead of left. */
+.floating-toolbar--center {
+  animation-name: ft-in-center;
+}
+@keyframes ft-in-center {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.story-mode .floating-toolbar--center,
+.mode-3d .floating-toolbar--center {
+  transform: translate(-50%, 16px);
+}
+@keyframes ft-in {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (max-width: 720px) {
+  .floating-toolbar {
+    gap: 6px;
+    bottom: calc(var(--gap-half) + env(safe-area-inset-bottom, 0px));
+  }
+  .floating-toolbar--right { right: calc(var(--gap-half) + env(safe-area-inset-right, 0px)); }
+  .floating-toolbar--left  { left:  calc(var(--gap-half) + env(safe-area-inset-left,  0px)); }
+
+  /* Icon-only mode on phones: drop the text label so the toolbar doesn't
+     stack four wide pills on a 360-wide screen. The icons stay tappable
+     at ~36px - well over the 24px minimum. */
+  .floating-toolbar .btn {
+    --btn-pad-y: 9px;
+    --btn-pad-x: 9px;
+    gap: 0;
+  }
+  .floating-toolbar .btn > span:not(.kbd) { display: none; }
+
+  /* Ambient toggle: trim the visualizer so it doesn't dominate the row. */
+  .floating-toolbar .ambient-toggle {
+    height: 36px;
+    padding: 0 8px;
+  }
+  .floating-toolbar .ambient-vis { width: 36px; }
+
+  /* Theme switch: slightly smaller so the row fits well within the safe area. */
+  .theme-switch {
+    --switch-w: 56px;
+    --switch-h: 30px;
+    --thumb-size: 24px;
+    --thumb-inset: 3px;
+  }
+}
+
+/* ============================================
+   Ambient lo-fi toggle - single button pill
+   with visualizer + speaker icon.
+   ============================================ */
+.ambient-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  background: var(--lighter-gray);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.55);
+  color: var(--gray);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition:
+    color 220ms var(--ease-out-quint),
+    border-color 220ms var(--ease-out-quint);
+}
+.ambient-toggle:hover { color: var(--fg); }
+.ambient-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.ambient-toggle .ambient-vis {
+  width: 56px;
+  height: 16px;
+  display: block;
+  opacity: 0.35;
+  transition: opacity 320ms var(--ease-out-quint);
+}
+.ambient-toggle[data-on="true"] .ambient-vis { opacity: 1; }
+.ambient-toggle .ambient-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  color: var(--gray);
+  transition: color 320ms var(--ease-out-quint);
+}
+.ambient-toggle[data-on="true"] .ambient-icon { color: var(--accent); }
+
+[data-theme="dark"] .ambient-toggle,
+:root:not([data-theme="light"]) .ambient-toggle {
+  background: #0d0e10;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 720px) {
+  .ambient-toggle {
+    height: 34px;
+    padding: 0 11px 0 9px;
+    gap: 9px;
+  }
+  .ambient-toggle .ambient-vis {
+    width: 60px;
+    height: 18px;
+  }
+}
+
+/* ============================================
+   3D theme switch - physical pill toggle
+   with a sliding thumb that sits proud of an
+   inset track.
+   ============================================ */
+.theme-switch {
+  --switch-w: 60px;
+  --switch-h: 30px;
+  --thumb-size: 24px;
+  --thumb-inset: 2px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+}
+.theme-switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.theme-switch .track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  background: var(--lighter-gray);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  /* Pressed-in groove */
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.55);
+  transition: background-color 520ms var(--ease-out-quint);
+}
+.theme-switch .icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--thumb-size) + 4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  pointer-events: none;
+  transition: color 520ms var(--ease-out-quint), opacity 520ms var(--ease-out-quint);
+}
+.theme-switch .icon.left  { left:  var(--thumb-inset); }
+.theme-switch .icon.right { right: var(--thumb-inset); }
+.theme-switch[data-on="false"] .icon.left  { color: var(--accent); }
+.theme-switch[data-on="true"]  .icon.right { color: var(--accent); }
+
+.theme-switch .thumb {
+  position: absolute;
+  top: var(--thumb-inset);
+  left: var(--thumb-inset);
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 var(--btn-inset-top);
+  transition:
+    transform 720ms cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 520ms var(--ease-out-quint);
+  z-index: 1;
+}
+.theme-switch[data-on="true"] .thumb {
+  transform: translateX(calc(var(--switch-w) - var(--thumb-size) - var(--thumb-inset) * 2));
+}
+.theme-switch .track,
+.theme-switch .icon {
+  transition-duration: 520ms;
+}
+.theme-switch:active .thumb {
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.18),
+    inset 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+.theme-switch:active .track {
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Dark mode: invert the groove highlight */
+[data-theme="dark"] .theme-switch .track,
+:root:not([data-theme="light"]) .theme-switch .track {
+  background: #0d0e10;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}

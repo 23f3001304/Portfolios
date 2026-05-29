@@ -1,0 +1,100 @@
+/* ============================================================
+   Motion - page entrance, theme View Transition wipe,
+   scroll reveal, and route change fades.
+   ============================================================ */
+.app-root {
+  /* backwards (not both): don't retain the final transform, or it would
+     override the 3D fold on .app-root. The no-flash start still holds. */
+  animation: page-in 900ms var(--ease-out-quint) backwards;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    filter: blur(18px);
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-root { animation: none; }
+}
+
+/* ============================================
+   View Transitions API - circular wipe from
+   the toggle origin for theme swap.
+   Fallback (no support): smooth crossfade.
+   ============================================ */
+@supports (view-transition-name: theme) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+  ::view-transition-new(root) {
+    z-index: 2;
+    animation: theme-clip 760ms var(--ease-out-quint);
+  }
+  @keyframes theme-clip {
+    from {
+      clip-path: circle(0% at var(--theme-x, 100%) var(--theme-y, 0%));
+    }
+    to {
+      clip-path: circle(150% at var(--theme-x, 100%) var(--theme-y, 0%));
+    }
+  }
+}
+
+/* Without VT API: smooth global crossfade */
+@supports not (view-transition-name: theme) {
+  html, body {
+    transition: background-color 280ms ease, color 280ms ease;
+  }
+}
+
+/* ============================================
+   Reveal on scroll
+   ============================================ */
+[data-reveal] {
+  transition:
+    opacity 680ms var(--ease-out-quint),
+    transform 680ms var(--ease-out-quint),
+    filter 680ms var(--ease-out-quint);
+  transition-delay: calc(var(--i, 0) * 70ms);
+  will-change: opacity, transform;
+}
+[data-reveal="out"] {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  filter: blur(2px);
+}
+[data-reveal="in"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+/* ============================================
+   Page route transitions
+   ============================================ */
+.route-fade {
+  animation: route-in 520ms var(--ease-out-quint);
+}
+@keyframes route-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}

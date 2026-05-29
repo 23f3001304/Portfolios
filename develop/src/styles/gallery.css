@@ -1,0 +1,350 @@
+/* ============================================================
+   3D gallery mode - the page folds back like a wall, and a
+   full-viewport WebGL canvas fades in over it. Toggled by the
+   `mode-3d` class on <html> (see use3DMode.js).
+   ============================================================ */
+
+/* The fold itself lives on .app-root. The page-in entrance uses
+   animation-fill-mode: backwards (not both) so it doesn't retain a
+   transform that would block this one. */
+.app-root {
+  transform-origin: 50% 100%;
+  transition:
+    transform 820ms var(--ease-out-quint),
+    opacity 600ms var(--ease-out-quint),
+    filter 600ms var(--ease-out-quint);
+}
+.mode-3d .app-root {
+  transform: perspective(1400px) rotateX(-74deg) scale(0.86);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* The fold projects a wide 3D bounding box - the fixed topbar gets pulled into
+   the perspective and spills past the viewport, which would add a horizontal
+   scrollbar. Clip it at the root while the studio is open; the page behind is
+   decorative here. overflow-x only, so the normal vertical gutter doesn't shift. */
+.mode-3d { overflow-x: hidden; }
+
+/* Chrome that would float over the canvas gets hidden in 3D. The toolbar
+   fades via opacity instead of display:none so it doesn't re-run its entry
+   animation each time the studio is closed. */
+.mode-3d .scroll-progress { display: none; }
+.mode-3d .floating-toolbar {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  pointer-events: none;
+}
+.mode-3d #oneko,
+.mode-3d #oneko-bubble { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-root { transition: opacity 200ms linear; }
+  .mode-3d .app-root { transform: none; filter: none; }
+}
+
+/* Full-viewport WebGL layer. */
+.scene-3d {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden; /* the 3D head-turn can poke past the edge - clip it */
+  transition: opacity 700ms var(--ease-out-quint);
+}
+.scene-3d[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.scene-3d canvas { display: block; touch-action: none; }
+
+.scene-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
+.scene-exit {
+  position: fixed;
+  top: var(--gap);
+  right: var(--gap);
+  z-index: 950;
+}
+
+/* Title card for projects without a screenshot (drei <Html>). */
+.scene-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+.scene-card .scene-card-id {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.75);
+}
+.scene-card strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+/* ============================================
+   Illustrated lobby - the Open Peeps guide
+   scene the fold drops you into.
+   ============================================ */
+.lobby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-double);
+  padding: var(--big-gap) var(--gap) var(--gap);
+  text-align: center;
+}
+.lobby-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0;
+}
+.lobby-title {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0;
+}
+.lobby-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 38vh;
+}
+.guide {
+  /* Turns toward the cursor in 3D - reads as "he's looking at you". */
+  transform:
+    perspective(900px)
+    translateX(calc(var(--look, 0) * 14px))
+    rotateY(calc(var(--look, 0) * 9deg))
+    rotateX(calc(var(--look-y, 0) * -5deg))
+    rotateZ(calc(var(--look, 0) * 1.5deg))
+    translateY(calc(var(--look-y, 0) * 7px));
+  transform-origin: 50% 72%;
+  transition: transform 360ms var(--ease-out-quint);
+  will-change: transform;
+}
+.guide-bob {
+  width: clamp(150px, 20vw, 240px);
+  aspect-ratio: 850 / 1200;
+  animation: guide-bob 4.5s ease-in-out infinite;
+}
+@keyframes guide-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.6%); }
+}
+.lobby-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-half);
+  justify-content: center;
+  max-width: 52rem;
+}
+.lobby-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0.7rem 1rem;
+  border-radius: var(--inline-radius);
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  box-shadow: var(--btn-shadow);
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    border-color 200ms var(--ease-out-quint),
+    box-shadow 200ms var(--ease-out-quint),
+    transform 200ms var(--ease-out-quint);
+}
+.lobby-card:hover,
+.lobby-card:focus-visible {
+  outline: none;
+  border-color: color-mix(in oklab, var(--c, var(--accent)) 60%, var(--btn-border));
+  box-shadow: var(--btn-shadow-hover), 0 0 0 1px var(--c, var(--accent));
+  transform: translateY(-2px);
+}
+.lobby-card .lobby-card-id {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+}
+.lobby-card strong {
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide-bob { animation: none; }
+  .guide { transition: none; transform: none; }
+  .guide-pop.is-pop { animation: none; }
+}
+
+/* Guide + speech sit side by side, vertically centred. */
+.lobby-stage { align-items: center; }
+
+/* One-shot click hop. */
+.guide-pop.is-pop { animation: guide-pop 460ms var(--ease-out-quint); }
+@keyframes guide-pop {
+  0%   { transform: translateY(0) scale(1); }
+  30%  { transform: translateY(-16px) scale(1.06); }
+  60%  { transform: translateY(0) scale(0.99); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Speech bubble the guide talks through. */
+.speech {
+  position: relative;
+  width: min(22rem, 78vw);
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  padding: var(--gap) var(--gap) var(--gap-half);
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
+  animation: speech-in 280ms var(--ease-out-quint);
+}
+@keyframes speech-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.speech::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 30px;
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  border-left: 1px solid var(--btn-border);
+  border-bottom: 1px solid var(--btn-border);
+  transform: rotate(45deg);
+}
+.speech-text {
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--fg);
+  margin: 0 0 var(--gap-half);
+  min-height: 3em;
+}
+.speech-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: -2px;
+  opacity: 0;
+}
+.speech-caret[data-on="true"] {
+  opacity: 1;
+  animation: caret-blink 700ms step-end infinite;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }
+.speech-more { text-decoration: none; }
+.speech-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 2px;
+  background: none;
+  border: 0;
+  color: var(--gray);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.speech-close:hover { color: var(--fg); }
+
+.lobby-card.is-active {
+  border-color: var(--c, var(--accent));
+  box-shadow: var(--btn-shadow-hover), 0 0 0 1px var(--c, var(--accent));
+}
+
+@media (max-width: 720px) {
+  .lobby-stage { flex-direction: column; gap: var(--gap); }
+  .speech::before { display: none; }
+}
+
+/* Clickable guide (says something about Hemang or the oneko pet). */
+.guide-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-half);
+}
+.guide-hit {
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.guide-hit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 8px;
+  border-radius: var(--radius);
+}
+.guide-hint {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--gray);
+  opacity: 0.6;
+  animation: hint-pulse 2.6s ease-in-out infinite;
+}
+@keyframes hint-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.8; } }
+@media (prefers-reduced-motion: reduce) { .guide-hint { animation: none; } }
+
+/* Gentle head nod while talking, in place of the idle bob. */
+.guide[data-talking="true"] .guide-bob {
+  animation: talk-nod 300ms ease-in-out infinite;
+}
+@keyframes talk-nod {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-1.6%) rotate(-1.2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide[data-talking="true"] .guide-bob { animation: none; }
+}
+
+/* Custom face overlay - cursor-tracking pupils + lip-sync, drawn exactly
+   over the face-less Open Peeps head (shared 850x1200 viewBox). */
+.guide-bob { position: relative; }
+.guide-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}

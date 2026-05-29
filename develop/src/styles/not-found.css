@@ -1,0 +1,86 @@
+/* ============================================================
+   404 / not-found page, plus the shared kbd chip styling used
+   by the 404 hint and the home footer hint.
+   ============================================================ */
+.shell.nf {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--small-gap);
+  padding-bottom: var(--big-gap);
+  text-align: center;
+}
+.nf-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-double);
+  width: 100%;
+  max-width: 32rem;
+  text-align: center;
+}
+.nf-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap-half) var(--gap);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--gray);
+}
+.nf-strip .kv .k { opacity: 0.5; }
+.nf-strip .kv .v { color: var(--fg); }
+.nf-strip .kv .v:first-of-type { color: var(--accent); }
+.nf-code {
+  font-family: var(--font-mono);
+  font-size: clamp(4rem, 18vw, 8rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--fg);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.nf-tagline {
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--gray);
+  max-width: 26rem;
+  margin: 0 auto;
+  text-wrap: balance;
+}
+.nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  margin-top: var(--gap-half);
+}
+.nf-btn { text-decoration: none; }
+.nf-hint {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gray);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nf-hint kbd, .footer-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 1px 5px;
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 3px;
+  color: var(--fg);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+}
+.footer-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.footer-hint kbd { font-size: 0.66rem; padding: 0 4px; }

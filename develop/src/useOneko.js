@@ -1,4 +1,13 @@
 import { useEffect } from 'react';
+import {
+  SPEED, FRAME_MS, DISTRACT_CHANCE, DISTRACT_MIN_FRAMES, DISTRACT_MAX_FRAMES,
+  SIT_CHANCE, SIT_MIN_FRAMES, SIT_MAX_FRAMES, IDLE_ACT_CHANCE, IDLE_TRIGGER,
+  FACT_CHANCE, FACT_COOLDOWN_FRAMES,
+} from './oneko/constants.js';
+import { spriteSets } from './oneko/sprites.js';
+import { wakePhrases, factPhrases, statePhrases, pick } from './oneko/phrases.js';
+import { createOnekoSynth } from './oneko/audio.js';
+import { createOnekoBubble } from './oneko/bubble.js';
 
 /*
  * Oneko pursuit pet - port of github.com/adryd325/oneko.js (MIT, © adryd325).
@@ -10,38 +19,13 @@ import { useEffect } from 'react';
  * "Distracted" means the cat ignores the cursor for a stretch and stays
  * where it is, letting the idle animation pool take over (sleep, scratch,
  * yawn). It does NOT wander to a random point.
+ *
+ * The supporting pieces live alongside this hook: sprite frames in
+ * ./oneko/sprites, bubble copy in ./oneko/phrases, sound effects in
+ * ./oneko/audio, and the speech-bubble element in ./oneko/bubble. This
+ * file owns the DOM element, input listeners, and the per-frame state
+ * machine that drives them. Behaviour tuning lives in ./oneko/constants.
  */
-
-const SPEED = 10;
-const FRAME_MS = 100;
-const DISTRACT_CHANCE = 1 / 160;   // ~once per 16 s of chasing
-const DISTRACT_MIN_FRAMES = 90;    // 9 s
-const DISTRACT_MAX_FRAMES = 240;   // 24 s
-const SIT_CHANCE = 1 / 220;        // mid-chase, just stop and sit
-const SIT_MIN_FRAMES = 40;         // 4 s
-const SIT_MAX_FRAMES = 120;        // 12 s
-const IDLE_ACT_CHANCE = 1 / 60;    // how often the cat picks an idle behaviour
-const IDLE_TRIGGER = 6;            // frames of idle before an act can kick in
-
-const spriteSets = {
-  idle:         [[-3, -3]],
-  alert:        [[-7, -3]],
-  scratchSelf:  [[-5, 0], [-6, 0], [-7, 0]],
-  scratchWallN: [[0, 0], [0, -1]],
-  scratchWallS: [[-7, -1], [-6, -2]],
-  scratchWallE: [[-2, -2], [-2, -3]],
-  scratchWallW: [[-4, 0], [-4, -1]],
-  tired:        [[-3, -2]],
-  sleeping:     [[-2, 0], [-2, -1]],
-  N:  [[-1, -2], [-1, -3]],
-  NE: [[0, -2],  [0, -3]],
-  E:  [[-3, 0],  [-3, -1]],
-  SE: [[-5, -1], [-5, -2]],
-  S:  [[-6, -3], [-7, -2]],
-  SW: [[-5, -3], [-6, -1]],
-  W:  [[-4, -2], [-4, -3]],
-  NW: [[-1, 0],  [-1, -1]],
-};
 
 export function useOneko({ src = '/oneko/oneko-dog.gif' } = {}) {
   useEffect(() => {
@@ -95,175 +79,22 @@ export function useOneko({ src = '/oneko/oneko-dog.gif' } = {}) {
     requestAnimationFrame(() => { nekoEl.style.opacity = '1'; });
 
     // Speech bubble - appears above the cat when clicked/awoken.
-    const existingBubble = document.getElementById('oneko-bubble');
-    if (existingBubble) existingBubble.remove();
-    const bubbleEl = document.createElement('div');
-    bubbleEl.id = 'oneko-bubble';
-    bubbleEl.setAttribute('aria-hidden', 'true');
-    bubbleEl.setAttribute('data-show', 'false');
-    mountParent.appendChild(bubbleEl);
+    const bubble = createOnekoBubble(mountParent);
 
-    const wakePhrases = [
-      'ok following!',
-      'i\'m up, i\'m up!',
-      'huh? oh hey.',
-      'where to?',
-      'let\'s go',
-      'right behind you',
-      'on it',
-      'yes boss',
-      'woof',
-    ];
-    // Random facts the dog occasionally tells visitors about Hemang.
-const factPhrases = [
-  'fyi: he\'s lazy but productive',
-  'life\'s a circle - it loops',
-  'he loves Jason Bourne movies',
-  'fact: he\'s 5\'9"',
-  'debugging at 2am counts as cardio',
-  'he studies computer science and questions reality daily',
-  'dual degree = double the paperwork',
-  'he fixes bugs by staring aggressively at the screen',
-  'his tabs have tabs',
-  'he knows the pain of sem backlog calculations',
-  'coffee is basically a runtime dependency',
-  'he learns DSA like it\'s a boss fight',
-  'sometimes the code works and nobody knows why',
-  'he opens youtube for one tutorial and emerges 3 hours later',
-  'ctrl+c and ctrl+v are trusted companions',
-  'he measures semesters in assignments survived',
-  'his sleep schedule uses random number generation',
-  'stack overflow has seen things',
-  'he trusts dark mode more than humanity',
-  'git commit messages become emotional near deadlines',
-  'his projects start with ambition and end with hotfixes',
-  'he treats warnings like decorative UI elements',
-  'there is always one sem subject plotting against him',
-  'he can explain neural networks but not his sleep cycle',
-  'wifi speed directly affects academic confidence',
-  'he survives on determination and cached notes',
-  'his code may not be clean but it has character',
-  'he believes every bug is a personal attack',
-];
-    // ~1/50 per 100ms frame ≈ once per ~5s on average.
-    const FACT_CHANCE = 1 / 150;
+    // Cadence is tuned in ./oneko/constants; this tracks the last fire.
     let lastFactFrame = -Infinity;
-    const FACT_COOLDOWN_FRAMES = 300; // ~10s minimum between facts
-    // Context-aware idle bubbles - one fires when the cat enters each state.
-    const statePhrases = {
-      sleeping:     ['zzz...', '*snore*', 'dreaming...', '💤'],
-      tired:        ['*yawn*', 'so tired', 'mmm...'],
-      scratchSelf:  ['scritch scritch', 'itchy!', '*scratch*'],
-      scratchWallN: ['scratch', '*scrape*'],
-      scratchWallS: ['scratch', '*scrape*'],
-      scratchWallE: ['scratch', '*scrape*'],
-      scratchWallW: ['scratch', '*scrape*'],
-    };
-    function pick(list) {
-      return list[Math.floor(Math.random() * list.length)];
-    }
-    let bubbleHideTimer = null;
-    function showBubble(text, duration = 1800) {
-      bubbleEl.textContent = text;
-      bubbleEl.setAttribute('data-show', 'true');
-      if (bubbleHideTimer) clearTimeout(bubbleHideTimer);
-      bubbleHideTimer = setTimeout(() => {
-        bubbleEl.setAttribute('data-show', 'false');
-      }, duration);
-    }
 
-    /* Lightweight Web Audio synth. Audio context is created lazily on the
-       first user gesture (the wake click) so autoplay policies don't block.
-       Once unlocked, idle-state sound effects can play too. */
-    let audioCtx = null;
-    function ensureAudio() {
-      if (audioCtx) return;
-      try {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) audioCtx = new Ctx();
-      } catch { /* no audio - silent fallback */ }
-    }
-    function playWoof() {
-      if (!audioCtx) return;
-      const t = audioCtx.currentTime;
-
-      // Low-fundamental body of the bark: sawtooth sliding 180 -> 80 Hz.
-      const osc = audioCtx.createOscillator();
-      const oscGain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(180, t);
-      osc.frequency.exponentialRampToValueAtTime(85, t + 0.16);
-      const oscFilter = audioCtx.createBiquadFilter();
-      oscFilter.type = 'lowpass';
-      oscFilter.frequency.setValueAtTime(1100, t);
-      oscFilter.frequency.exponentialRampToValueAtTime(380, t + 0.18);
-      oscFilter.Q.value = 1.6;
-      oscGain.gain.setValueAtTime(0, t);
-      oscGain.gain.linearRampToValueAtTime(0.09, t + 0.015);
-      oscGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-      osc.connect(oscFilter).connect(oscGain).connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + 0.23);
-
-      // Plosive noise burst for the "uff" texture.
-      const noiseBuf = audioCtx.createBuffer(1, 0.12 * audioCtx.sampleRate, audioCtx.sampleRate);
-      const noiseData = noiseBuf.getChannelData(0);
-      for (let i = 0; i < noiseData.length; i++) noiseData[i] = (Math.random() * 2 - 1) * 0.6;
-      const noiseSrc = audioCtx.createBufferSource();
-      noiseSrc.buffer = noiseBuf;
-      const noiseFilter = audioCtx.createBiquadFilter();
-      noiseFilter.type = 'lowpass';
-      noiseFilter.frequency.value = 900;
-      const noiseGain = audioCtx.createGain();
-      noiseGain.gain.setValueAtTime(0.045, t);
-      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-      noiseSrc.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
-      noiseSrc.start(t);
-      noiseSrc.stop(t + 0.15);
-    }
-    function playScratch() {
-      if (!audioCtx) return;
-      const t = audioCtx.currentTime;
-      // 80 ms burst of band-passed noise.
-      const buffer = audioCtx.createBuffer(1, 0.08 * audioCtx.sampleRate, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-      const src = audioCtx.createBufferSource();
-      src.buffer = buffer;
-      const filt = audioCtx.createBiquadFilter();
-      filt.type = 'bandpass';
-      filt.frequency.value = 2400;
-      filt.Q.value = 1.4;
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.035, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-      src.connect(filt).connect(gain).connect(audioCtx.destination);
-      src.start(t);
-      src.stop(t + 0.09);
-    }
-    function playYawn() {
-      if (!audioCtx) return;
-      const t = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(200, t);
-      osc.frequency.linearRampToValueAtTime(140, t + 0.5);
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.03, t + 0.15);
-      gain.gain.linearRampToValueAtTime(0, t + 0.55);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + 0.6);
-    }
+    // Web Audio synth - unlocked lazily on the first wake click (a user
+    // gesture), then reused for idle scratch/yawn effects.
+    const synth = createOnekoSynth();
 
     // Track the previous idle animation so we only bubble/sound on transitions.
     let lastIdleAnimation = null;
     function onIdleAnimationStarted(name) {
       const list = statePhrases[name];
-      if (list) showBubble(pick(list), name === 'sleeping' ? 2400 : 1500);
-      if (name === 'tired')                                 playYawn();
-      else if (name && name.startsWith('scratch'))          playScratch();
+      if (list) bubble.show(pick(list), name === 'sleeping' ? 2400 : 1500);
+      if (name === 'tired')                                 synth.yawn();
+      else if (name && name.startsWith('scratch'))          synth.scratch();
     }
 
     function setSprite(name, frame) {
@@ -321,7 +152,7 @@ const factPhrases = [
         Math.random() < FACT_CHANCE
       ) {
         lastFactFrame = frameCount;
-        showBubble(pick(factPhrases), 3200);
+        bubble.show(pick(factPhrases), 3200);
       }
 
       // Ignore-cursor mode - freeze in place, let idle behaviours play.
@@ -387,19 +218,13 @@ const factPhrases = [
       nekoEl.style.top = `${nekoPosY - 16}px`;
     }
 
-    function updateBubblePosition() {
-      // Anchor the bubble's bottom-center pointer ~6px above the cat.
-      bubbleEl.style.left = `${nekoPosX}px`;
-      bubbleEl.style.top  = `${nekoPosY - 16 - 6}px`;
-    }
-
     function onAnimationFrame(timestamp) {
       if (!nekoEl.isConnected) return;
       if (!lastFrameTimestamp) lastFrameTimestamp = timestamp;
       if (timestamp - lastFrameTimestamp > FRAME_MS) {
         lastFrameTimestamp = timestamp;
         frame();
-        updateBubblePosition();
+        bubble.moveTo(nekoPosX, nekoPosY);
         // Detect transitions into a named idle animation.
         if (idleAnimation !== lastIdleAnimation) {
           if (idleAnimation) onIdleAnimationStarted(idleAnimation);
@@ -440,9 +265,9 @@ const factPhrases = [
       idleAnimationFrame = 0;
       idleTime = 0;
       setSprite('alert', 0);
-      // The click is a user gesture - safe to unlock audio and play a meow.
-      ensureAudio();
-      playWoof();
+      // The click is a user gesture - safe to unlock audio and play a woof.
+      synth.ensure();
+      synth.woof();
 
       // Wobble: re-trigger by removing then re-adding next frame.
       nekoEl.classList.remove('oneko-wake');
@@ -452,7 +277,7 @@ const factPhrases = [
       wakeTimer = setTimeout(() => nekoEl.classList.remove('oneko-wake'), 560);
 
       // Speech bubble with a random wake phrase.
-      showBubble(pick(wakePhrases));
+      bubble.show(pick(wakePhrases));
     }
 
     document.addEventListener('mousemove', onMouseMove);
@@ -465,11 +290,10 @@ const factPhrases = [
       document.removeEventListener('touchmove', onTouch);
       document.removeEventListener('pointerdown', onDocPointerDown);
       if (wakeTimer) clearTimeout(wakeTimer);
-      if (bubbleHideTimer) clearTimeout(bubbleHideTimer);
       if (rafId) window.cancelAnimationFrame(rafId);
-      if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
+      synth.close();
       nekoEl.remove();
-      bubbleEl.remove();
+      bubble.destroy();
     };
   }, [src]);
 }

@@ -1,0 +1,127 @@
+/* ============================================================
+   Command palette - overlay, search input, grouped results.
+   ============================================================ */
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 18vh;
+  animation: cp-overlay-in 200ms var(--ease-out-quint);
+}
+[data-theme="dark"] .cp-overlay,
+:root:not([data-theme="light"]) .cp-overlay { background: rgba(0, 0, 0, 0.55); }
+@keyframes cp-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.cp {
+  width: min(36rem, 92vw);
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
+  overflow: hidden;
+  animation: cp-in 280ms var(--ease-out-quint);
+}
+@keyframes cp-in {
+  from { opacity: 0; transform: translate3d(0, -12px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+.cp-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-half);
+  padding: 0.85rem var(--gap);
+  border-bottom: 1px solid var(--light-gray);
+}
+.cp-input-row .prompt {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+.cp-input-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  letter-spacing: -0.015em;
+}
+.cp-input-row input::placeholder { color: var(--gray); }
+.cp-input-row .esc {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--gray);
+  padding: 2px 6px;
+  border: 1px solid var(--btn-border);
+  border-radius: 3px;
+}
+.cp-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--gap-half);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.cp-group-label {
+  padding: var(--gap-half) var(--gap-half) var(--gap-quarter);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--gray);
+  letter-spacing: 0.1em;
+}
+.cp-item {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) minmax(0, auto);
+  gap: var(--gap-half);
+  align-items: center;
+  padding: 0.55rem var(--gap-half);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background-color 100ms ease-out;
+}
+.cp-item .icon {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--gray);
+  text-align: center;
+  white-space: nowrap;
+}
+.cp-item .label-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cp-item .hint {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--gray);
+  letter-spacing: 0.04em;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cp-item[data-active="true"] {
+  background: color-mix(in oklab, var(--fg) 6%, transparent);
+}
+.cp-item[data-active="true"] .icon { color: var(--accent); }
+.cp-empty {
+  padding: var(--gap);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gray);
+}

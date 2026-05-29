@@ -1,13 +1,4 @@
-import { useEffect, useState } from 'react';
-
-function applyTheme(next) {
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-
-function systemPrefersDark() {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
+import { useTheme, toggleTheme } from '../theme.js';
 
 function SunIcon() {
   return (
@@ -39,37 +30,13 @@ function MoonIcon() {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') {
-      setTheme(stored);
-      document.documentElement.setAttribute('data-theme', stored);
-    } else {
-      setTheme(systemPrefersDark() ? 'dark' : 'light');
-    }
-  }, []);
-
-  const isDark = theme === 'dark';
+  // Reads from the shared theme store, so the switch reflects every change -
+  // including the Cmd/Ctrl+. keyboard shortcut, not just its own click.
+  const isDark = useTheme() === 'dark';
 
   function toggle(e) {
-    const next = isDark ? 'light' : 'dark';
-
     const rect = e.currentTarget.getBoundingClientRect();
-    document.documentElement.style.setProperty('--theme-x', `${rect.left + rect.width / 2}px`);
-    document.documentElement.style.setProperty('--theme-y', `${rect.top + rect.height / 2}px`);
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduced && document.startViewTransition) {
-      document.startViewTransition(() => {
-        applyTheme(next);
-        setTheme(next);
-      });
-    } else {
-      applyTheme(next);
-      setTheme(next);
-    }
+    toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
   }
 
   return (

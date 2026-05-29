@@ -1,0 +1,81 @@
+/* ============================================================
+   Cross-cutting media queries - mobile layout overrides,
+   reduced-motion, and print. Loaded last so these win over
+   the component defaults they override.
+   ============================================================ */
+
+/* ============================================
+   Mobile
+   ============================================ */
+@media (max-width: 720px) {
+  .shell { padding: var(--gap-double) var(--gap) var(--small-gap); }
+  .hero { flex-direction: column; gap: var(--gap); }
+  .contacts { text-align: left; }
+  .section, .proj-section, .proj-figma { grid-template-columns: 1fr; gap: var(--gap); }
+  .section::before { position: static; display: inline-block; margin-right: var(--gap-half); }
+  .section h2 { padding-left: 0; }
+  .skill-row { grid-template-columns: 1fr; gap: var(--gap-quarter); }
+  .project-card { grid-template-columns: auto 1fr; }
+  .proj-metrics { grid-template-columns: repeat(2, 1fr); }
+  .proj-metrics .metric-cell { border-right: none; border-bottom: 1px solid var(--light-gray); }
+  .proj-metrics .metric-cell:nth-child(odd) { border-right: 1px solid var(--light-gray); }
+  .proj-metrics .metric-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .proj h1 { font-size: 1.875rem; }
+  h1 { font-size: 1.75rem; }
+  .nav-pill .item { padding: 5px 9px; font-size: 0.7rem; }
+  .nav-pill .item.hide-sm { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Print - render this as a clean resume.
+   Hide every piece of interactive chrome and
+   force a paper-friendly palette regardless of
+   the current theme.
+   ============================================ */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --fg: #000000;
+    --gray: #444444;
+    --light-gray: #cccccc;
+    --accent: #000000;
+  }
+  html, body { background: #fff !important; color: #000 !important; }
+  .topbar,
+  .floating-toolbar,
+  .scroll-progress,
+  .cp-overlay,
+  .footer-hint,
+  #oneko,
+  #oneko-bubble {
+    display: none !important;
+  }
+  .shell { max-width: 100% !important; padding: 0 !important; }
+  .hero, .section, .row, .project-grid, .education-row, .cert {
+    break-inside: avoid;
+  }
+  .project-card {
+    box-shadow: none !important;
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+  }
+  a {
+    color: #000 !important;
+    text-decoration-color: #666 !important;
+  }
+  /* Show URLs after external links so the printed page is self-contained */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+}

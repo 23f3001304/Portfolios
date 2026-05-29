@@ -1,0 +1,211 @@
+/* ============================================================
+   Home page - hero, numbered sections, project list, skills,
+   education, certifications, and footer.
+   ============================================================ */
+
+/* ============================================
+   Home - hero
+   ============================================ */
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-double);
+  padding-bottom: var(--small-gap);
+}
+.hero h1 { margin-bottom: var(--gap-half); }
+.hero .role { color: var(--gray); font-size: 0.95rem; }
+.hero .role .sep {
+  display: inline-block;
+  width: 4px; height: 4px;
+  background: currentColor;
+  border-radius: 1px;
+  margin: 0 var(--gap-half);
+  vertical-align: middle;
+  opacity: 0.5;
+}
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-quarter);
+  text-align: right;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--gray);
+}
+.contacts a { color: var(--gray); text-decoration-color: transparent; }
+.contacts a:hover { color: var(--fg); text-decoration-color: color-mix(in oklab, var(--fg) 25%, transparent); }
+
+/* ============================================
+   Section with quiet left-margin counter
+   ============================================ */
+.sections { counter-reset: section; }
+.section {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--gap-double);
+  padding: var(--gap-double) 0;
+  border-top: 1px solid var(--light-gray);
+  counter-increment: section;
+  position: relative;
+}
+.section h2 { padding-top: 0.2rem; }
+.section::before {
+  content: counter(section, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: calc(var(--gap-double) + 0.18rem);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+.section h2 { padding-left: 1.6rem; }
+.section-body { display: flex; flex-direction: column; gap: var(--gap-double); }
+
+.intro p { font-size: 1.0625rem; line-height: 1.6; }
+.intro p + p { margin-top: var(--gap); }
+
+.row { display: flex; flex-direction: column; gap: var(--gap-half); }
+.row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+.row-head .meta {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--gray);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.row .org {
+  font-size: 0.95rem;
+  color: var(--fg);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  margin-top: 2px;
+}
+.row .sub { font-size: 0.88rem; color: var(--gray); margin-top: 1px; }
+.row ul {
+  margin: var(--gap-half) 0 0;
+  padding-left: 1.1rem;
+  display: flex; flex-direction: column; gap: var(--gap-quarter);
+}
+.row li { font-size: 0.95rem; line-height: 1.55; }
+.row li::marker { color: var(--gray); }
+
+/* ============================================
+   Project list (home) - tactile rows
+   ============================================ */
+.project-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-half);
+}
+.project-card-wrap { display: block; }
+.project-card {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: var(--gap);
+  align-items: center;
+  padding: var(--gap) var(--gap);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--inline-radius);
+  background-color: var(--btn-bg);
+  box-shadow: var(--btn-shadow);
+  text-decoration: none;
+  color: var(--fg);
+  transition:
+    background-color 220ms var(--ease-out-quint),
+    box-shadow 220ms var(--ease-out-quint),
+    border-color 220ms var(--ease-out-quint);
+}
+.project-card:hover {
+  text-decoration: none;
+  background-color: var(--btn-bg-hover);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+.project-card:active {
+  background-color: var(--btn-bg-active);
+  box-shadow: var(--btn-shadow-active);
+}
+.project-card .id {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--gray);
+  letter-spacing: 0.06em;
+}
+.project-card .name { display: flex; flex-direction: column; gap: 2px; }
+.project-card .name strong {
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+.project-card .name .tagline {
+  font-size: 0.86rem;
+  color: var(--gray);
+  line-height: 1.4;
+}
+.project-card .status {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--gray);
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+.project-card .status[data-status="SHIPPED"] { color: var(--accent); }
+.project-card .status[data-status="LIVE"]    { color: var(--accent); }
+
+/* ============================================
+   Skills
+   ============================================ */
+.skills-grid { display: flex; flex-direction: column; gap: var(--gap-half); }
+.skill-row {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--gap);
+  font-size: 0.92rem;
+}
+.skill-row .label {
+  color: var(--gray);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding-top: 0.1rem;
+}
+.tags { display: flex; flex-wrap: wrap; gap: var(--gap-quarter) var(--gap-half); }
+.tag { font-size: 0.88rem; }
+.tag-sep { color: var(--gray); margin: 0 2px; opacity: 0.6; }
+
+/* ============================================
+   Education + certs
+   ============================================ */
+.education-row { display: flex; flex-direction: column; gap: 2px; }
+.education-row .top { display: flex; justify-content: space-between; gap: var(--gap); }
+.education-row .school { font-weight: 500; }
+.education-row .degree, .education-row .meta { font-size: 0.88rem; color: var(--gray); }
+.education-row .meta { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.certs { display: flex; flex-direction: column; gap: var(--gap-half); }
+.cert { display: flex; justify-content: space-between; gap: var(--gap); font-size: 0.92rem; }
+.cert .when { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray); }
+
+/* ============================================
+   Footer
+   ============================================ */
+.footer {
+  margin-top: var(--big-gap);
+  padding-top: var(--gap-double);
+  border-top: 1px solid var(--light-gray);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--gray);
+}

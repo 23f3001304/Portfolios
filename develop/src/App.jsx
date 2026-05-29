@@ -4,6 +4,11 @@ import { ThemeToggle } from './components/ThemeToggle.jsx';
 import { AmbientAudio } from './components/AmbientAudio.jsx';
 import { RouteTransition } from './components/RouteTransition.jsx';
 import { ScrollProgress } from './components/ScrollProgress.jsx';
+import { ModeToggle } from './components/ModeToggle.jsx';
+import { Mode3D } from './components/Mode3D.jsx';
+import { StoryButton } from './components/StoryButton.jsx';
+import { StoryMode } from './components/StoryMode.jsx';
+import { LightboxProvider } from './components/LightboxProvider.jsx';
 import { useThemeShortcut } from './useThemeShortcut.js';
 import { useLenis } from './useLenis.js';
 import Home from './pages/Home.jsx';
@@ -14,7 +19,7 @@ export default function App() {
   useLenis();
   useThemeShortcut();
   return (
-    <>
+    <LightboxProvider>
       <ScrollProgress />
       <div className="app-root">
         <Nav />
@@ -32,9 +37,15 @@ export default function App() {
       <div className="floating-toolbar floating-toolbar--left">
         <AmbientAudio />
       </div>
+      <div className="floating-toolbar floating-toolbar--center">
+        <ModeToggle />
+        <StoryButton />
+      </div>
       <div className="floating-toolbar floating-toolbar--right">
         <ThemeToggle />
       </div>
-    </>
+      <Mode3D />
+      <StoryMode />
+    </LightboxProvider>
   );
 }

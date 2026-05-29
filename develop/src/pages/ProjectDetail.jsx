@@ -61,7 +61,7 @@ export default function ProjectDetail() {
           <div className="body">
             <h3>{s.title}</h3>
             <p>{s.body}</p>
-            {s.figure && <Figure id={s.figure.id} caption={s.figure.caption} kind="PLACEHOLDER · IMG" />}
+            {s.figure && <Figure id={s.figure.id} caption={s.figure.caption} src={s.figure.src} alt={s.figure.alt} kind="PLACEHOLDER · IMG" />}
           </div>
         </Reveal>
       ))}
@@ -73,6 +73,8 @@ export default function ProjectDetail() {
             <Figure
               id={project.figma.id}
               caption={project.figma.caption}
+              src={project.figma.src}
+              alt={project.figma.alt}
               kind="PLACEHOLDER · FIGMA"
             />
           </div>

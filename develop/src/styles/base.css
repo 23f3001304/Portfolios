@@ -1,0 +1,81 @@
+/* ============================================================
+   Base - reset, document defaults, scrollbar, Lenis hooks,
+   body typography, selection, and the main content shell.
+   ============================================================ */
+* { box-sizing: border-box; }
+
+html {
+  scrollbar-gutter: stable;
+  color-scheme: light dark;
+}
+
+/* Mobile X-scroll guard: nothing on the page should ever cause horizontal
+   scrolling. `overflow-x: clip` clips overflow without creating a scroll
+   container, so position: fixed/sticky still anchor to the viewport. */
+html, body { overflow-x: clip; }
+
+/* Lenis hooks */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: clip; }
+
+/* ============================================
+   Custom scrollbar - minimal, fades in
+   ============================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--fg) 18%, transparent) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--fg) 14%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 200ms ease-out;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--fg) 32%, transparent);
+}
+::-webkit-scrollbar-corner { background: transparent; }
+
+.cp-list::-webkit-scrollbar { width: 6px; }
+.cp-list::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--fg) 16%, transparent);
+  border: 1px solid transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.020em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body { min-height: 100vh; }
+
+::selection {
+  text-shadow: none;
+  background: var(--selection);
+  color: var(--bg);
+}
+
+/* ============================================
+   Shell
+   ============================================ */
+.shell {
+  max-width: var(--main-content);
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--small-gap) var(--gap) var(--big-gap);
+}
+.shell.wide { max-width: var(--wide-content); }

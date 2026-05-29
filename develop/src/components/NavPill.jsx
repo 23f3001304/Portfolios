@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const items = [
   { to: '/',                          label: 'index',    match: (p) => p === '/' },
-  { to: '/projects/quizzy',           label: 'projects', match: (p) => p.startsWith('/projects') },
+  { to: '/projects/typereal',         label: 'projects', match: (p) => p.startsWith('/projects') },
 ];
 
 const externals = [
@@ -17,15 +17,37 @@ export function NavPill() {
 
   useLayoutEffect(() => {
     const root = ref.current;
-    if (!root) return;
-    const active = root.querySelector('.item.active');
-    if (active) {
-      const r = active.getBoundingClientRect();
-      const rootR = root.getBoundingClientRect();
-      setIndicator({ left: r.left - rootR.left, width: r.width });
-    } else {
-      setIndicator(null);
+    if (!root) return undefined;
+    // Use offsetLeft/offsetWidth instead of getBoundingClientRect: the topbar
+    // lives inside .app-root, which is transformed (perspective + rotateX +
+    // scale) while studio mode is opening/closing. Rect-based measurement
+    // would capture POST-transform pixels, so the indicator settled at the
+    // wrong x once the transform released. Offsets are CSS-pixel and immune
+    // to ancestor transforms.
+    function measure() {
+      const active = root.querySelector('.item.active');
+      if (!active) { setIndicator(null); return; }
+      if (active.offsetParent === root) {
+        setIndicator({ left: active.offsetLeft, width: active.offsetWidth });
+      } else {
+        // fall back if .nav-pill ever loses position:relative
+        const r = active.getBoundingClientRect();
+        const rootR = root.getBoundingClientRect();
+        setIndicator({ left: r.left - rootR.left, width: r.width });
+      }
     }
+    measure();
+    // Re-measure when the web font finishes loading (item widths change when
+    // Inter swaps in over the fallback) and on viewport resize.
+    let cancelled = false;
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => { if (!cancelled) measure(); });
+    }
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', measure);
+    };
   }, [pathname]);
 
   return (

@@ -1,0 +1,86 @@
+/* ============================================================
+   Fixed overlays - scroll progress bar and the oneko pet's
+   speech bubble + click-wake animation.
+   ============================================================ */
+
+/* Scroll progress bar - thin accent line at the top */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.9;
+  will-change: transform;
+}
+
+/* Oneko speech bubble - pops above the cat on wake-click */
+#oneko-bubble {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 8px;
+  padding: 5px 9px;
+  white-space: nowrap;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.10),
+    0 6px 16px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 var(--btn-inset-top);
+  transform: translate3d(-50%, -100%, 0) scale(0.85);
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition:
+    opacity 220ms var(--ease-out-quint),
+    transform 320ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+#oneko-bubble[data-show="true"] {
+  opacity: 1;
+  transform: translate3d(-50%, -100%, 0) scale(1);
+}
+#oneko-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  background: var(--surface);
+  border-right: 1px solid var(--btn-border);
+  border-bottom: 1px solid var(--btn-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+[data-theme="dark"] #oneko-bubble,
+:root:not([data-theme="light"]) #oneko-bubble {
+  background: #1c1f25;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 var(--btn-inset-top);
+}
+[data-theme="dark"] #oneko-bubble::after,
+:root:not([data-theme="light"]) #oneko-bubble::after {
+  background: #1c1f25;
+}
+
+/* Oneko click-wake animation - runs once when the cat is clicked */
+#oneko.oneko-wake {
+  animation: oneko-wake 520ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes oneko-wake {
+  0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0); }
+  18%  { transform: translate3d(0, -10px, 0) scale(1.18) rotate(-6deg); }
+  38%  { transform: translate3d(0, 0, 0) scale(0.94) rotate(4deg); }
+  60%  { transform: translate3d(0, -4px, 0) scale(1.06) rotate(-2deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0); }
+}

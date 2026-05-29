@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { useMode } from '../use3DMode.js';
+import { useStory } from '../useStoryMode.js';
 
 /*
  * Ambient audio toggle. Plays /audio/bedtime.mp3 in a loop with a soft
@@ -37,17 +39,28 @@ export function AmbientAudio() {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
+  // Story/Studio modes have their own soundscape, so the site loop pauses while
+  // either is open - the user's on/off preference is preserved meanwhile.
+  // Both hooks must be called unconditionally (no `||` short-circuit, or the
+  // hook order changes between renders and React throws).
+  const studioOpen = useMode();
+  const storyOpen = useStory();
+  const active = enabled && !studioOpen && !storyOpen;
+
   useEffect(() => {
     if (localStorage.getItem('ambient') === 'on') setEnabled(true);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('ambient', enabled ? 'on' : 'off');
-    if (enabled) start();
+  }, [enabled]);
+
+  useEffect(() => {
+    if (active) start();
     else stop();
     return stop;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled]);
+  }, [active]);
 
   function start() {
     if (refs.current.ctx) return;

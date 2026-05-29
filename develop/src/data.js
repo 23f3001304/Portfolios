@@ -54,6 +54,100 @@ export const certifications = [
    ============================================================ */
 export const projects = [
   {
+    id: 'PRJ-004',
+    slug: 'typereal',
+    name: 'TypeReal',
+    tagline: 'A Monkeytype-class typing instrument - seven modes, a sub-16 ms engine, and a server-authoritative duel.',
+    when: 'May 2026 → Present',
+    status: 'LIVE',
+    stack: ['React', 'TypeScript', 'Fastify', 'Prisma', 'Socket.IO'],
+    metrics: [
+      { value: '7',  unit: '',   label: 'test modes' },
+      { value: '16', unit: 'ms', label: 'keystroke-to-pixel budget' },
+      { value: '6',  unit: '',   label: 'built-in themes' },
+      { value: '0',  unit: '',   label: 'signup to start typing' },
+    ],
+    accent: '#ff6b35',
+    overview: [
+      'TypeReal is a typing-speed trainer in the Monkeytype lineage, rebuilt around one obsession: the gap between a key going down and the glyph turning correct should never be felt. The whole front end is budgeted to keep that path under 16 ms - one frame at 60 Hz.',
+      'It runs as a monorepo - a React + TypeScript client on Vite, and a Fastify API with Prisma, Lucia sessions, and Arctic OAuth. Guests type immediately; signing in unlocks history, a 1v1 duel, and a ghost that races your own best run.',
+    ],
+    sections: [
+      {
+        title: 'The typing surface',
+        body: 'The interactive surface counts correct and error characters in refs rather than React state, so WPM and accuracy are exact on every keystroke instead of approximated from cursor position. The caret is a single absolutely-positioned bar that slides ~80 ms between cells and snaps on line wrap. Below 70% accuracy the run is marked failed - the WPM number is struck through and a quiet `test failed` badge appears instead of celebrating a bad result.',
+        figure: { id: 'FIG 4.1', caption: 'The /test surface - seven modes, live WPM and accuracy, no signup.', src: '/projects/typereal/test.png', alt: 'TypeReal typing surface with mode pills, live stats, and a word passage' },
+      },
+      {
+        title: 'Real-time duels and a ghost of your best run',
+        body: 'A server-authoritative 1v1 duel puts the opponent\'s cursor on your passage in real time over Socket.IO - pick a track, create a private room, share the link. A ghost mode races you against your own fastest run on the exact same text. The seven solo modes (time, words, quote, zen, numbers, code across four languages, and paste-your-own custom) narrow to the four that make sense head-to-head.',
+        figure: { id: 'FIG 4.2', caption: 'The duel lobby - private 1v1 rooms over a shared passage.', src: '/projects/typereal/duel.png', alt: 'TypeReal duel lobby with track and difficulty pills' },
+      },
+      {
+        title: 'A theme system down to the token',
+        body: 'Every colour is a `--tr-*` token - surfaces, foreground, borders, and semantic states all the way down to the opponent and ghost cursors. The editor sets each one against a live preview that types in solo, versus-opponent, and versus-ghost states at once, so a theme is judged on real passages rather than swatches. Six built-in themes ship; the custom editor unlocks for signed-in users.',
+        figure: { id: 'FIG 4.3', caption: 'The theme editor - every token, with a live typing preview.', src: '/projects/typereal/themes-editor.png', alt: 'TypeReal theme token editor with color tokens and a live preview' },
+      },
+      {
+        title: 'History, accounts, and the backend behind them',
+        body: 'Signed-in users get every test logged - WPM, raw, accuracy, consistency, and time, filterable per mode. Behind it is a Fastify API issuing Lucia cookie sessions via magic-link email (single-use tokens hashed at rest, 10-minute TTL, rate-limited per route) and Google OAuth through Arctic with state-cookie CSRF protection. Account linking only trusts a verified Google email, token consumption is race-safe, and the whole surface is documented down to every secret it reads.',
+        figure: { id: 'FIG 4.4', caption: 'History - every test, by mode, with per-run telemetry.', src: '/projects/typereal/history.png', alt: 'TypeReal history table of past tests with WPM and accuracy' },
+      },
+    ],
+    figma: null,
+    links: [
+      { label: 'Website', href: 'https://typereal.coehemang.dev' },
+      { label: 'GitHub',  href: 'https://github.com/coehemang' },
+    ],
+  },
+  {
+    id: 'PRJ-005',
+    slug: 'formdash',
+    name: 'Formdash',
+    tagline: 'A form builder where the branching actually holds - one rule engine, enforced in three places.',
+    when: 'May 2026',
+    status: 'LIVE',
+    stack: ['React', 'Express', 'Prisma', 'PostgreSQL', 'Tailwind'],
+    metrics: [
+      { value: '24', unit: '',  label: 'field & display block types' },
+      { value: '44', unit: '',  label: 'API tests, ~450 ms' },
+      { value: '3',  unit: '',  label: 'contexts, one rule engine' },
+      { value: '7',  unit: '+', label: 'anti-abuse guards' },
+    ],
+    accent: '#5c7cfa',
+    overview: [
+      'Formdash takes the boring parts of forms seriously: branching that holds, responses that can\'t be forged, and uploads that are what they claim to be. You drag questions onto a canvas, wire up show/hide rules, publish to a public URL, and watch responses land with per-question analytics.',
+      'It is a pnpm monorepo - a React 19 client on Vite with Tailwind v4 and shadcn primitives, and an Express API on Prisma. The web tier deploys to Cloudflare Pages, the API to Heroku with Postgres, and files go to any S3-compatible bucket through one storage driver.',
+    ],
+    sections: [
+      {
+        title: 'A builder that previews itself',
+        body: 'The editor is drag-and-drop over dnd-kit, with 18 question types and 6 display blocks, a live preview, and per-form theming. Drafts persist through a dedicated Web Worker that owns IndexedDB - the UI never touches the network directly, so autosave and offline edits stay smooth, and the old localStorage store migrates itself on first run.',
+        figure: { id: 'FIG 5.1', caption: 'The drag-and-drop editor with live preview.', src: '/projects/formdash/editor-build.png', alt: 'Formdash drag-and-drop form editor' },
+      },
+      {
+        title: 'One rule engine, three contexts',
+        body: 'Conditional logic - nested AND/OR groups over eq / neq / gt / lt / contains - is written once in a shared package and evaluated in three places: the editor preview, the public runtime, and the server. The last one matters. A respondent can POST straight to `/submit` and skip the UI, so the server re-evaluates visibility and only requires answers to questions that were actually shown.',
+        figure: { id: 'FIG 5.2', caption: 'Branching rules in the editor, mirrored server-side.', src: '/projects/formdash/editor-logic.png', alt: 'Formdash conditional logic editor' },
+      },
+      {
+        title: 'Responses, analytics, and an API',
+        body: 'Owners get a filtered responses list, per-question charts in Recharts, CSV export, HMAC-signed webhooks, and personal access tokens for a public REST API. Each form carries its own constraints - password gating, a response cap, a close date, and optional geolocation gated behind explicit consent.',
+        figure: { id: 'FIG 5.3', caption: 'Per-question analytics for a live form.', src: '/projects/formdash/analytics.png', alt: 'Formdash response analytics dashboard' },
+      },
+      {
+        title: 'Anti-abuse and the file path',
+        body: 'Public endpoints sit behind layered rate limits (per-IP, per-form-and-IP, per-token), a honeypot, timing checks, and payload size and nesting caps. Uploads are validated by MIME and magic bytes, not just extension, and webhook delivery runs through an SSRF guard so a hostile target URL can\'t reach internal hosts. 44 vitest specs cover the guards, the webhook HMAC round-trip, and the rate-limit math.',
+        figure: { id: 'FIG 5.4', caption: 'The public form runtime a respondent sees.', src: '/projects/formdash/public-form.png', alt: 'Formdash public form runtime' },
+      },
+    ],
+    figma: null,
+    links: [
+      { label: 'Website', href: 'https://formdash.coehemang.dev' },
+      { label: 'GitHub',  href: 'https://github.com/coehemang' },
+    ],
+  },
+  {
     id: 'PRJ-001',
     slug: 'quizzy',
     name: 'Quizzy',

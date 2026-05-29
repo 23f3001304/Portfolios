@@ -1,0 +1,94 @@
+/* ============================================================
+   Top nav with sliding indicator pill.
+   ============================================================ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--light-gray);
+}
+.topbar-inner {
+  max-width: var(--wide-content);
+  margin: 0 auto;
+  padding: 0.6rem var(--gap);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-half);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  color: var(--fg);
+}
+.brand .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: transform 240ms var(--ease-out-quint);
+}
+.brand:hover .dot { transform: rotate(45deg) scale(1.1); }
+
+.nav-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  background-color: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  box-shadow: var(--btn-shadow);
+}
+.nav-pill .item {
+  position: relative;
+  z-index: 2;
+  padding: 5px 11px;
+  color: var(--gray);
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 200ms var(--ease-out-quint);
+}
+.nav-pill .item:hover { color: var(--fg); }
+.nav-pill .item.active { color: var(--fg); }
+.nav-pill .indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+  z-index: 1;
+  transition:
+    left 320ms var(--ease-out-quint),
+    width 320ms var(--ease-out-quint),
+    opacity 200ms ease-out;
+  pointer-events: none;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.16),
+    0 2px 5px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+[data-theme="dark"] .nav-pill .indicator,
+:root:not([data-theme="light"]) .nav-pill .indicator {
+  background: #1f2024;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nav-side {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-half);
+}
