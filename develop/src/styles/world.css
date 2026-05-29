@@ -344,6 +344,15 @@ html.world-mode, html.world-mode body { overflow: hidden; }
   .world-inspect-prev { left: 6px; }
   .world-inspect-next { right: 6px; }
   .world-inspect-nav { background: color-mix(in oklab, var(--surface) 80%, transparent); }
+
+  /* Anchor the hint to the bottom-left so it doesn't crowd the zoom pill. */
+  .world-hint {
+    left: var(--gap-half);
+    right: auto;
+    transform: none;
+    text-align: left;
+  }
+  .world-readout { right: var(--gap-half); }
 }
 
 .world-empty {
