@@ -139,16 +139,18 @@ export function createGuideAudio() {
   let ambienceTried = false;
 
   async function loadAmbience() {
-    if (ambienceBuf || ambienceTried || !ctx) return;
+    if (ambienceBuf || ambienceTried || !ctx) { console.log('[GA] loadAmbience SKIP', { hasBuf: !!ambienceBuf, tried: ambienceTried, hasCtx: !!ctx }); return; }
     ambienceTried = true;
     for (const ext of ['mp3', 'wav', 'ogg']) {
       try {
         const res = await fetch(`/audio/ambience.${ext}`);
-        if (!res.ok) continue;
+        if (!res.ok) { console.log('[GA] fetch !ok', ext, res.status); continue; }
         ambienceBuf = await ctx.decodeAudioData(await res.arrayBuffer());
+        console.log('[GA] decoded', ext, !!ambienceBuf);
         return;
-      } catch { /* try next extension */ }
+      } catch (e) { console.log('[GA] decode FAIL', ext, String(e && e.message || e), 'ctx?', !!ctx, ctx && ctx.state); }
     }
+    console.log('[GA] loadAmbience END no-buffer');
   }
   function synthDrone(out) {
     const filt = ctx.createBiquadFilter();
@@ -173,6 +175,7 @@ export function createGuideAudio() {
     const claim = {};
     ambient = claim; // reserve the slot before the async load (no double-start)
     await loadAmbience();
+    console.log('[GA] post-load ' + JSON.stringify({ claimCurrent: ambient === claim, hasCtx: !!ctx, ctxState: ctx && ctx.state, hasBuf: !!ambienceBuf }));
     if (ambient !== claim || !ctx || ctx.state === 'closed') { if (ambient === claim) ambient = null; return; }
     const out = ctx.createGain();
     out.gain.setValueAtTime(0.0001, ctx.currentTime);
@@ -186,13 +189,17 @@ export function createGuideAudio() {
     } else {
       nodes = synthDrone(out);
     }
+    window.__gaBeds = (window.__gaBeds || 0) + 1;
+    console.log('[GA] bed START ' + (ambienceBuf ? 'BUFFER' : 'SYNTHDRONE') + ' active=' + window.__gaBeds);
     ambient = { out, nodes };
   }
   function stopAmbient() {
     if (!ambient || !ctx) return;
     const cur = ambient;
     ambient = null;
-    if (!cur.out) return; // was only a claim token (file still loading)
+    if (!cur.out) { console.log('[GA] stopAmbient (claim only)'); return; } // was only a claim token (file still loading)
+    window.__gaBeds = (window.__gaBeds || 1) - 1;
+    console.log('[GA] bed STOP active=' + window.__gaBeds);
     const t = ctx.currentTime;
     try {
       cur.out.gain.cancelScheduledValues(t);

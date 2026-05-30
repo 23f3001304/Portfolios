@@ -1,7 +1,10 @@
 import { memo, useEffect, useRef } from 'react';
-import RawPeep from 'react-peeps';
 import { useTheme } from '../theme.js';
 import { Face } from './Face.jsx';
+import { PeepArt } from './PeepArt.jsx';
+
+// Stable so the memoised <PeepArt> isn't re-rendered on every cursor move.
+const PEEP_STYLE = { width: '100%', height: '100%' };
 
 /*
  * The illustrated guide - a face-less Open Peeps head/body (so the baked eyes
@@ -31,13 +34,7 @@ export const Guide = memo(function Guide({
     <div className="guide" style={{ '--look': look, '--look-y': lookY }} data-talking={talking}>
       <div className="guide-pop" ref={popRef}>
         <div className="guide-bob">
-          <RawPeep
-            body="ShirtPantsWB"
-            hair="ShortMessy"
-            strokeColor={stroke}
-            backgroundColor={fill}
-            style={{ width: '100%', height: '100%' }}
-          />
+          <PeepArt strokeColor={stroke} backgroundColor={fill} style={PEEP_STYLE} />
           <Face
             stroke={stroke}
             look={look}
