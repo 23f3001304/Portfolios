@@ -24,6 +24,14 @@
      caption - title in the inspector (optional; falls back to alt)
      taken   - ISO local datetime 'YYYY-MM-DDTHH:mm' (optional)
    ============================================================ */
+// /world/*.webp are static files in /public, NOT content-hashed - so if a CDN
+// edge ever cached a bad response for one (e.g. the SPA's index.html 404 fallback,
+// served while a file was briefly missing during a rename), it keeps serving that
+// stale copy for the life of the cache header. Appending a version query gives
+// every photo URL a fresh cache key - the clean form of the `//world/6.webp`
+// double-slash trick. Bump WORLD_V whenever a world photo is replaced or renamed.
+const WORLD_V = 2;
+
 export const worldPhotos = [
   { src: '/world/1.webp',  w: 1599, h: 1200, alt: 'Photograph 01', taken: null },
   { src: '/world/2.webp',  w: 1152, h: 864,  alt: 'Photograph 02', taken: null },
@@ -61,4 +69,4 @@ export const worldPhotos = [
   { src: '/world/34.webp', w: 1280, h: 576,  alt: 'Photograph 34', taken: '2024-03-02T17:24' },
   { src: '/world/35.webp', w: 960,  h: 1280, alt: 'Photograph 35', taken: '2025-01-08T18:28' },
   { src: '/world/36.webp', w: 960,  h: 1280, alt: 'Photograph 36', taken: '2025-01-08T18:31' },
-];
+].map((photo) => ({ ...photo, src: `${photo.src}?v=${WORLD_V}` }));
