@@ -2,12 +2,15 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Long-cache the static media too.
+# Static media is NOT fingerprinted - these filenames get reused when photos are
+# added, renamed, or re-encoded. Cache for speed but force revalidation so a
+# changed (or briefly-missing) file can't stay stale for weeks. stale-while-
+# revalidate keeps it fast while a background request refreshes the copy.
 /world/*
-  Cache-Control: public, max-age=2592000
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /projects/*
-  Cache-Control: public, max-age=2592000
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /oneko/*
-  Cache-Control: public, max-age=2592000
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /audio/*
-  Cache-Control: public, max-age=2592000
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400

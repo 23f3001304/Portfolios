@@ -130,76 +130,71 @@ export function createGuideAudio() {
   }
   function filler() { vowel(FILLERS[Math.floor(Math.random() * FILLERS.length)]); }
   /* ---- ambient bed: a quiet looped room tone (file: /audio/ambience.*),
-     with a synth drone fallback if the file is missing. Kept low on purpose,
-     and ducks further while the guide is narrating so the voice sits forward. ---- */
+     silent if the file is missing. Kept low on purpose, and ducks further
+     while the guide is narrating so the voice sits forward. ---- */
   const AMB_GAIN = 0.018; // subtle background bed - barely-there forest
   const AMB_DUCKED = 0.007; // a whisper while the guide is talking
   let ambient = null;
-  let ambienceBuf = null;
-  let ambienceTried = false;
+  // Cache the ENCODED file bytes (which are context-independent) and decode them
+  // fresh against whatever AudioContext is live when a scene starts - so a buffer
+  // is never bound to a context that has since closed. If the file can't be
+  // fetched or decoded we simply stay silent; there is deliberately NO synth
+  // fallback - that oscillator drone was the "humm".
+  let ambienceBytes = null;
+  let ambienceBytesPromise = null;
 
-  async function loadAmbience() {
-    if (ambienceBuf || ambienceTried || !ctx) { console.log('[GA] loadAmbience SKIP', { hasBuf: !!ambienceBuf, tried: ambienceTried, hasCtx: !!ctx }); return; }
-    ambienceTried = true;
-    for (const ext of ['mp3', 'wav', 'ogg']) {
-      try {
-        const res = await fetch(`/audio/ambience.${ext}`);
-        if (!res.ok) { console.log('[GA] fetch !ok', ext, res.status); continue; }
-        ambienceBuf = await ctx.decodeAudioData(await res.arrayBuffer());
-        console.log('[GA] decoded', ext, !!ambienceBuf);
-        return;
-      } catch (e) { console.log('[GA] decode FAIL', ext, String(e && e.message || e), 'ctx?', !!ctx, ctx && ctx.state); }
+  function loadAmbienceBytes() {
+    if (ambienceBytes) return Promise.resolve(ambienceBytes);
+    if (!ambienceBytesPromise) {
+      ambienceBytesPromise = (async () => {
+        for (const ext of ['mp3', 'wav', 'ogg']) {
+          try {
+            const res = await fetch(`/audio/ambience.${ext}`);
+            if (!res.ok) continue;
+            // A SPA catch-all redirect (/* -> index.html 200) serves HTML for a
+            // missing file; decoding that HTML used to fail silently and drop us
+            // onto the synth "humm". Skip anything that isn't really audio.
+            const type = res.headers.get('content-type') || '';
+            if (type.includes('text/html')) continue;
+            ambienceBytes = await res.arrayBuffer();
+            return ambienceBytes;
+          } catch { /* try next extension */ }
+        }
+        ambienceBytesPromise = null; // let a later startAmbient retry the fetch
+        return null;
+      })();
     }
-    console.log('[GA] loadAmbience END no-buffer');
-  }
-  function synthDrone(out) {
-    const filt = ctx.createBiquadFilter();
-    filt.type = 'lowpass'; filt.frequency.value = 620; filt.Q.value = 0.7;
-    filt.connect(out);
-    const oscs = [[110, 0.6, 'sine'], [165, 0.32, 'triangle'], [220, 0.22, 'sine']].map(([f, gv, type]) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = type; o.frequency.value = f; g.gain.value = gv;
-      o.connect(g).connect(filt); o.start();
-      return o;
-    });
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.frequency.value = 0.05; lfoGain.gain.value = 240;
-    lfo.connect(lfoGain).connect(filt.frequency); lfo.start();
-    return [...oscs, lfo];
+    return ambienceBytesPromise;
   }
   async function startAmbient() {
     ensure();
     if (!ctx || ambient) return;
     const claim = {};
     ambient = claim; // reserve the slot before the async load (no double-start)
-    await loadAmbience();
-    console.log('[GA] post-load ' + JSON.stringify({ claimCurrent: ambient === claim, hasCtx: !!ctx, ctxState: ctx && ctx.state, hasBuf: !!ambienceBuf }));
+    const bytes = await loadAmbienceBytes();
+    // Bail if a stop()/close() or another start() happened while we loaded.
+    if (ambient !== claim || !ctx || ctx.state === 'closed') { if (ambient === claim) ambient = null; return; }
+    if (!bytes) { ambient = null; return; } // no file -> stay silent, never hum
+    let buf;
+    try {
+      // decodeAudioData detaches its input, so hand it a copy and keep the cache.
+      buf = await ctx.decodeAudioData(bytes.slice(0));
+    } catch { ambient = null; return; }
+    // The decode is async too - re-check the slot/context before wiring up.
     if (ambient !== claim || !ctx || ctx.state === 'closed') { if (ambient === claim) ambient = null; return; }
     const out = ctx.createGain();
     out.gain.setValueAtTime(0.0001, ctx.currentTime);
     out.gain.linearRampToValueAtTime(AMB_GAIN, ctx.currentTime + 2.5);
     out.connect(ctx.destination);
-    let nodes;
-    if (ambienceBuf) {
-      const src = ctx.createBufferSource();
-      src.buffer = ambienceBuf; src.loop = true; src.connect(out); src.start();
-      nodes = [src];
-    } else {
-      nodes = synthDrone(out);
-    }
-    window.__gaBeds = (window.__gaBeds || 0) + 1;
-    console.log('[GA] bed START ' + (ambienceBuf ? 'BUFFER' : 'SYNTHDRONE') + ' active=' + window.__gaBeds);
-    ambient = { out, nodes };
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.loop = true; src.connect(out); src.start();
+    ambient = { out, nodes: [src] };
   }
   function stopAmbient() {
     if (!ambient || !ctx) return;
     const cur = ambient;
     ambient = null;
-    if (!cur.out) { console.log('[GA] stopAmbient (claim only)'); return; } // was only a claim token (file still loading)
-    window.__gaBeds = (window.__gaBeds || 1) - 1;
-    console.log('[GA] bed STOP active=' + window.__gaBeds);
+    if (!cur.out) return; // was only a claim token (file still loading)
     const t = ctx.currentTime;
     try {
       cur.out.gain.cancelScheduledValues(t);
@@ -224,12 +219,9 @@ export function createGuideAudio() {
     if (ctx && ctx.state !== 'closed') ctx.close();
     ctx = null;
     Object.keys(buffers).forEach((k) => delete buffers[k]);
-    // Crucial in dev (React StrictMode mounts twice): the ambience buffer is
-    // bound to THIS context - if we keep it, the next context tries to play a
-    // buffer from a closed context and produces silence (so only the synth
-    // drone is heard, which is what the "humm" was). Reload fresh next time.
-    ambienceBuf = null;
-    ambienceTried = false;
+    // The ambience cache holds the raw ENCODED file bytes, which are not tied to
+    // any context - keep them so the next scene decodes instantly (and never
+    // re-fetches), with no risk of replaying a buffer from a closed context.
   }
 
   return { ensure, cue, blip, vowel, filler, startAmbient, stopAmbient, duck, unduck, close };
