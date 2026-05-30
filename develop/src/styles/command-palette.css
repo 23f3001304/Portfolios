@@ -92,12 +92,16 @@
   transition: background-color 100ms ease-out;
 }
 .cp-item .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--gray);
   text-align: center;
   white-space: nowrap;
 }
+.cp-item .icon svg { width: 15px; height: 15px; display: block; }
 .cp-item .label-text {
   min-width: 0;
   overflow: hidden;

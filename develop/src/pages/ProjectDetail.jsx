@@ -4,6 +4,7 @@ import { useOneko } from '../useOneko.js';
 import { useDocumentTitle } from '../useDocumentTitle.js';
 import { Reveal } from '../components/Reveal.jsx';
 import { Figure } from '../components/Figure.jsx';
+import { ProjectToc } from '../components/ProjectToc.jsx';
 import { projects, projectBySlug } from '../data.js';
 
 export default function ProjectDetail() {
@@ -23,8 +24,16 @@ export default function ProjectDetail() {
   const prev = idx > 0 ? projects[idx - 1] : null;
   const next = idx < projects.length - 1 ? projects[idx + 1] : null;
 
+  const toc = [
+    { id: 'overview', label: 'Overview' },
+    ...project.sections.map((s, i) => ({ id: `s-${i + 1}`, label: s.title })),
+    ...(project.figma ? [{ id: 'figma', label: 'Figma board' }] : []),
+    ...(project.links?.length ? [{ id: 'links', label: 'Links' }] : []),
+  ];
+
   return (
     <main className="shell wide proj">
+      <ProjectToc items={toc} accent={project.accent} />
       <Reveal as="header" className="proj-header">
         <div className="proj-meta-strip">
           <span className="kv"><span className="k">ID</span> <span className="v">{project.id}</span></span>
@@ -51,13 +60,13 @@ export default function ProjectDetail() {
         ))}
       </Reveal>
 
-      <Reveal as="section" className="proj-overview">
+      <Reveal as="section" className="proj-overview" id="overview">
         {project.overview.map((p, i) => <p key={i}>{p}</p>)}
       </Reveal>
 
       {project.sections.map((s, i) => (
-        <Reveal as="section" className="proj-section" key={i}>
-          <div className="label">§ {String(i + 1).padStart(2, '0')}</div>
+        <Reveal as="section" className="proj-section" key={i} id={`s-${i + 1}`}>
+          <div className="label">{String(i + 1).padStart(2, '0')}</div>
           <div className="body">
             <h3>{s.title}</h3>
             <p>{s.body}</p>
@@ -67,7 +76,7 @@ export default function ProjectDetail() {
       ))}
 
       {project.figma && (
-        <Reveal as="section" className="proj-figma">
+        <Reveal as="section" className="proj-figma" id="figma">
           <div className="label">FIGMA</div>
           <div>
             <Figure
@@ -82,7 +91,7 @@ export default function ProjectDetail() {
       )}
 
       {project.links?.length > 0 && (
-        <Reveal as="section" className="proj-section">
+        <Reveal as="section" className="proj-section" id="links">
           <div className="label">LINKS</div>
           <div className="body" style={{ flexDirection: 'row', gap: 'var(--gap-half)' }}>
             {project.links.map((l) => (

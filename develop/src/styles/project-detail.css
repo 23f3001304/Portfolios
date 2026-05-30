@@ -191,6 +191,122 @@
 }
 .proj-figma .frame { aspect-ratio: 16 / 10; }
 
+/* ============================================================
+   Table of contents - a popover opened from a control in the
+   floating toolbar (see .toc-trigger in controls.css). The panel is
+   portalled to <body> and JS-anchored just above its trigger, so it
+   works at every width; on phones the trigger sits on its own row
+   above the studio/story/world cluster.
+   ============================================================ */
+.toc-pop {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 320;
+  width: min(21rem, 92vw);
+  max-height: min(62vh, 30rem);
+  display: flex;
+  flex-direction: column;
+  padding: var(--gap-half);
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
+  animation: toc-pop-in 220ms var(--ease-out-quint);
+  transform-origin: bottom center;
+}
+@keyframes toc-pop-in {
+  from { opacity: 0; transform: translate(-50%, 8px) scale(0.98); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.toc-pop-head {
+  padding: var(--gap-half) var(--gap-half) var(--gap-quarter);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gray);
+  opacity: 0.7;
+}
+
+.toc-pop-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.toc-pop-item {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) 0.5rem;
+  gap: var(--gap-half);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.5rem var(--gap-half);
+  cursor: pointer;
+  color: var(--gray);
+  font-family: inherit;
+  transition: background-color 140ms var(--ease-out-quint), color 140ms var(--ease-out-quint);
+}
+.toc-pop-item:hover {
+  background: color-mix(in oklab, var(--fg) 5%, transparent);
+  color: var(--fg);
+}
+.toc-pop-item:focus-visible {
+  outline: 2px solid var(--toc-accent, var(--accent));
+  outline-offset: -2px;
+}
+
+.toc-pop-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  transition: color 140ms var(--ease-out-quint);
+}
+.toc-pop-marker svg { width: 14px; height: 14px; display: block; }
+.toc-pop-num {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+}
+
+.toc-pop-label {
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.toc-pop-flag {
+  justify-self: end;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 140ms var(--ease-out-quint), box-shadow 140ms var(--ease-out-quint);
+}
+
+.toc-pop-item[data-active="true"] {
+  background: color-mix(in oklab, var(--toc-accent, var(--accent)) 13%, transparent);
+  color: var(--fg);
+}
+.toc-pop-item[data-active="true"] .toc-pop-marker { color: var(--toc-accent, var(--accent)); }
+.toc-pop-item[data-active="true"] .toc-pop-label { font-weight: 500; }
+.toc-pop-item[data-active="true"] .toc-pop-flag {
+  background: var(--toc-accent, var(--accent));
+  box-shadow: 0 0 8px -1px var(--toc-accent, var(--accent));
+}
+
 .proj-nav {
   display: flex;
   justify-content: space-between;

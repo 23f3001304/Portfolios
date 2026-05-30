@@ -9,7 +9,7 @@ import sharp from 'sharp';
 import { readdir, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 
-const DIR = path.resolve('public/world');
+const DIR = path.resolve('../public/world');
 const QUALITY = Number(process.argv[2]) || 82; // pass a number to override, e.g. `node scripts/optimize-world.mjs 80`
 
 const files = (await readdir(DIR)).filter((f) => /\.(jpe?g|png)$/i.test(f));

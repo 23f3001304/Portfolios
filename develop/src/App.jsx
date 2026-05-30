@@ -40,9 +40,14 @@ export default function App() {
         <AmbientAudio />
       </div>
       <div className="floating-toolbar floating-toolbar--center">
-        <ModeToggle />
-        <StoryButton />
-        <WorldButton />
+        {/* ProjectToc portals its trigger here so it sits among the controls;
+            empty (and hidden) on non-project pages. */}
+        <div id="toc-slot" className="ft-toc-slot" />
+        <div className="ft-modes">
+          <ModeToggle />
+          <StoryButton />
+          <WorldButton />
+        </div>
       </div>
       <div className="floating-toolbar floating-toolbar--right">
         <ThemeToggle />

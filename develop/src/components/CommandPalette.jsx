@@ -2,14 +2,39 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projects } from '../data.js';
 
+/* Small line icons for the nav rows - 15px, stroke = currentColor so they
+   pick up the row's gray and flip to accent when the row is active. */
+const S = { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': true };
+const IconAbout = () => (
+  <svg {...S}><circle cx="12" cy="7.5" r="3.2" stroke="currentColor" strokeWidth="1.8" /><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+);
+const IconExperience = () => (
+  <svg {...S}><rect x="3.5" y="7.5" width="17" height="12" rx="2" stroke="currentColor" strokeWidth="1.8" /><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 12.5h17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+);
+const IconProjects = () => (
+  <svg {...S}><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" /></svg>
+);
+const IconSkills = () => (
+  <svg {...S}><path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+);
+const IconEducation = () => (
+  <svg {...S}><path d="M12 4 2.5 9 12 14l9.5-5L12 4Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M6 11v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+);
+const IconCerts = () => (
+  <svg {...S}><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="M9 13.5 8 21l4-2.2L16 21l-1-7.5" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>
+);
+const IconHome = () => (
+  <svg {...S}><path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+
 const baseCommands = [
-  { id: 'home',         icon: '⌂', label: 'Go to index',        hint: 'Home',     to: '/' },
-  { id: 'about',        icon: '§', label: 'About',              hint: 'Home § 01', to: '/#about',        anchor: 'about' },
-  { id: 'experience',   icon: '§', label: 'Experience',         hint: 'Home § 02', to: '/#experience',   anchor: 'experience' },
-  { id: 'projects',     icon: '§', label: 'All projects',       hint: 'Home § 03', to: '/#projects',     anchor: 'projects' },
-  { id: 'skills',       icon: '§', label: 'Skills',             hint: 'Home § 04', to: '/#skills',       anchor: 'skills' },
-  { id: 'education',    icon: '§', label: 'Education',          hint: 'Home § 05', to: '/#education',    anchor: 'education' },
-  { id: 'certs',        icon: '§', label: 'Certifications',     hint: 'Home § 06', to: '/#certifications', anchor: 'certifications' },
+  { id: 'home',         icon: <IconHome />,       label: 'Go to index',    hint: 'Home',       to: '/' },
+  { id: 'about',        icon: <IconAbout />,      label: 'About',          hint: 'Home · 01',  to: '/#about',          anchor: 'about' },
+  { id: 'experience',   icon: <IconExperience />, label: 'Experience',     hint: 'Home · 02',  to: '/#experience',     anchor: 'experience' },
+  { id: 'projects',     icon: <IconProjects />,   label: 'All projects',   hint: 'Home · 03',  to: '/#projects',       anchor: 'projects' },
+  { id: 'skills',       icon: <IconSkills />,     label: 'Skills',         hint: 'Home · 04',  to: '/#skills',         anchor: 'skills' },
+  { id: 'education',    icon: <IconEducation />,  label: 'Education',      hint: 'Home · 05',  to: '/#education',      anchor: 'education' },
+  { id: 'certs',        icon: <IconCerts />,      label: 'Certifications', hint: 'Home · 06',  to: '/#certifications', anchor: 'certifications' },
 ];
 
 const externalCommands = [
