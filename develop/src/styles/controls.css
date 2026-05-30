@@ -307,16 +307,21 @@
 }
 
 /* ============================================
-   Table-of-contents control - the trigger sits
-   among the center toolbar buttons (ProjectToc
-   portals it into #toc-slot). `display: contents`
-   lets it join the flex row directly; the slot
-   collapses on non-project pages. The panel is
-   styled in project-detail.css.
+   Table-of-contents control - ProjectToc portals
+   its trigger into #toc-slot. On project pages it
+   owns the centered row above the mode controls;
+   the slot collapses on non-project pages.
    ============================================ */
-.ft-toc-slot { display: contents; }
+.floating-toolbar--center {
+  flex-direction: column;
+  gap: 8px;
+}
+.ft-toc-slot { display: block; }
 .ft-toc-slot:empty { display: none; }
-.ft-modes { display: contents; }
+.ft-modes {
+  display: flex;
+  gap: var(--gap-half);
+}
 
 .toc-trigger[data-open="true"] {
   color: var(--fg);
@@ -326,9 +331,6 @@
 }
 
 @media (max-width: 720px) {
-  /* Lift the TOC onto its own row above the studio/story/world cluster so the
-     bottom bar never has to hold five pills across a narrow screen. */
-  .floating-toolbar--center { flex-direction: column; gap: 8px; }
-  .ft-toc-slot { display: block; }
+  /* Keep the bottom cluster tight after button labels collapse to icons. */
   .ft-modes { display: flex; gap: 6px; }
 }

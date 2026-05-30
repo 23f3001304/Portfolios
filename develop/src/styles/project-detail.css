@@ -192,16 +192,34 @@
 .proj-figma .frame { aspect-ratio: 16 / 10; }
 
 /* ============================================================
-   Table of contents - a popover opened from a control in the
-   floating toolbar (see .toc-trigger in controls.css). The panel is
-   portalled to <body> and JS-anchored just above its trigger, so it
-   works at every width; on phones the trigger sits on its own row
-   above the studio/story/world cluster.
+   Table of contents - a centered modal opened from the middle
+   toolbar. The overlay blurs the project page back so the section
+   list gets the same deliberate focus as the command palette.
    ============================================================ */
-.toc-pop {
+.toc-overlay {
   position: fixed;
-  transform: translateX(-50%);
-  z-index: 320;
+  inset: 0;
+  z-index: 8500;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in oklab, var(--bg) 18%, transparent);
+  overscroll-behavior: contain;
+  animation: toc-overlay-in 140ms ease-out;
+}
+[data-theme="dark"] .toc-overlay,
+:root:not([data-theme="light"]) .toc-overlay {
+  background: rgba(0, 0, 0, 0.16);
+}
+@keyframes toc-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.toc-pop {
+  position: relative;
   width: min(21rem, 92vw);
   max-height: min(62vh, 30rem);
   display: flex;
@@ -209,14 +227,14 @@
   padding: var(--gap-half);
   background: var(--surface);
   border: 1px solid var(--btn-border);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: var(--shadow-pop), inset 0 1px 0 var(--btn-inset-top);
   animation: toc-pop-in 220ms var(--ease-out-quint);
   transform-origin: bottom center;
 }
 @keyframes toc-pop-in {
-  from { opacity: 0; transform: translate(-50%, 8px) scale(0.98); }
-  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 .toc-pop-head {
