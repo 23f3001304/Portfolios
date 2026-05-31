@@ -21,7 +21,7 @@ export const animy = {
   sections: [
     {
       title: 'Prompt in, animation out',
-      body: 'ANIMY turns a sentence into a short animation. The prompt goes to Gemini 2.5 Pro under a system prompt that pins it to Manim, the Python animation engine; the model returns Python, the server writes it to a file and renders it headlessly with `manim -qm`, ffmpeg lifts a thumbnail off the result, and the mp4, thumbnail, and source all land in Cloudflare R2. Each stage updates a status record so the client can narrate what is happening.',
+      body: 'ANIMY turns a sentence into a short animation. The prompt goes to Gemini Pro under a system prompt that pins it to Manim, the Python animation engine; the model returns Python, the server writes it to a file and renders it headlessly with `manim -qm`, ffmpeg lifts a thumbnail off the result, and the mp4, thumbnail, and source all land in Cloudflare R2. Each stage updates a status record so the client can narrate what is happening.',
       blocks: [
         { kind: 'diagram', id: 'animy-pipeline', caption: 'A prompt becomes Manim code, renders to an mp4, and is stored in R2.' },
         { kind: 'code', lang: 'js', caption: 'aiService.js · the model writes Manim, then it renders', code: [

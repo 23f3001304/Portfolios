@@ -5,7 +5,7 @@ export const quizzy = {
   tagline: 'An autonomous agent that solves a quiz end to end - a fast planner, a tool-using solver, and a sandbox that runs its own code.',
   when: 'Nov → Dec 2025',
   status: 'SHIPPED',
-  stack: ['FastAPI', 'Pydantic AI', 'Gemini 2.5', 'Docker'],
+  stack: ['FastAPI', 'Pydantic AI', 'Gemini', 'Docker'],
   metrics: [
     { value: '90', unit: '',     label: 'tools, 12 modules' },
     { value: '2',  unit: '',     label: 'agents: plan + solve' },

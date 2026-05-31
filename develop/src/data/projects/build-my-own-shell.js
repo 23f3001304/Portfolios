@@ -5,7 +5,7 @@ export const buildMyOwnShell = {
   tagline: 'A POSIX shell in C++ - the read, parse, decide, exec loop behind every $ prompt, built from the syscalls up.',
   when: 'Oct → Nov 2024',
   status: 'ARCHIVED',
-  stack: ['C++17', 'POSIX', 'fork / exec', 'CMake'],
+  stack: ['C++', 'POSIX', 'fork / exec', 'CMake'],
   metrics: [
     { value: '6', unit: '', label: 'built-in commands' },
     { value: '3', unit: '', label: 'syscalls: fork · exec · wait' },

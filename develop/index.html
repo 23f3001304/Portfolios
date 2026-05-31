@@ -8,16 +8,34 @@
     <meta name="theme-color" content="#15171c" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
 
+    <!-- If the portfolio deploys to a different URL, change this base in the
+         canonical / og:url / og:image / twitter:image tags below. -->
+    <link rel="canonical" href="https://developer.coehemang.dev/" />
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp, Discord, etc.) -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Hemang Choudhary" />
+    <meta property="og:url" content="https://developer.coehemang.dev/" />
     <meta property="og:title" content="Hemang Choudhary - Engineer" />
     <meta property="og:description" content="Backend systems, ML pipelines, and the occasional weird side-project." />
     <meta property="og:locale" content="en_IN" />
+    <meta property="og:image" content="https://developer.coehemang.dev/og.png" />
+    <meta property="og:image:secure_url" content="https://developer.coehemang.dev/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hemang Choudhary - Backend & ML systems" />
 
-    <meta name="twitter:card" content="summary" />
+    <!-- Twitter / X large-image card -->
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Hemang Choudhary - Engineer" />
     <meta name="twitter:description" content="Backend systems, ML pipelines, and the occasional weird side-project." />
+    <meta name="twitter:image" content="https://developer.coehemang.dev/og.png" />
+    <meta name="twitter:image:alt" content="Hemang Choudhary - Backend & ML systems" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- Inter is loaded off the critical path: preconnect (crossorigin, so the
          connection is reused for the woff2 font files), then load the CSS async
          via rel=preload->stylesheet. The system-font fallback paints instantly
