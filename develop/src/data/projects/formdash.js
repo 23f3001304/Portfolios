@@ -7,8 +7,8 @@ export const formdash = {
   status: 'LIVE',
   stack: ['React', 'Express', 'Prisma', 'PostgreSQL', 'Tailwind'],
   metrics: [
-    { value: '24', unit: '',  label: 'field & display block types' },
-    { value: '44', unit: '',  label: 'API tests, ~450 ms' },
+    { value: '23', unit: '',  label: 'field & display block types' },
+    { value: '44', unit: '',  label: 'API tests, sub-second' },
     { value: '3',  unit: '',  label: 'contexts, one rule engine' },
     { value: '7',  unit: '+', label: 'anti-abuse guards' },
   ],
@@ -20,7 +20,7 @@ export const formdash = {
   sections: [
     {
       title: 'A builder that previews itself',
-      body: 'The editor is drag-and-drop over dnd-kit, with 18 question types and 6 display blocks, a live preview, and per-form theming. Drafts persist through a dedicated Web Worker that owns IndexedDB - the UI never touches the network directly, so autosave and offline edits stay smooth, and the old localStorage store migrates itself on first run.',
+      body: 'The editor is drag-and-drop over dnd-kit, with 17 question types and 6 display blocks, a live preview, and per-form theming. Drafts persist through a dedicated Web Worker that owns IndexedDB - the UI never touches the network directly, so autosave and offline edits stay smooth, and the old localStorage store migrates itself on first run.',
       figure: { id: 'FIG 5.1', caption: 'The drag-and-drop editor with live preview.', src: '/projects/formdash/editor-build.png', alt: 'Formdash drag-and-drop form editor' },
     },
     {
