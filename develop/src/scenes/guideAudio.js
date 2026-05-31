@@ -64,17 +64,17 @@ export function createGuideAudio() {
     osc.frequency.exponentialRampToValueAtTime(base * 1.08, t + 0.05);
     filt.type = 'lowpass'; filt.frequency.value = 1400;
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.04, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
     osc.connect(filt).connect(g).connect(ctx.destination);
     osc.start(t); osc.stop(t + 0.09);
   }
   const FORMANTS = {
-    ooh: { pitch: 150, f1: 320, f2: 760, dur: 0.34, peak: 0.06 },
-    ahh: { pitch: 165, f1: 720, f2: 1180, dur: 0.30, peak: 0.06 },
-    uhh: { pitch: 150, f1: 540, f2: 1000, dur: 0.26, peak: 0.055 },
-    umm: { pitch: 140, f1: 360, f2: 600, dur: 0.34, peak: 0.05 },
-    hmm: { pitch: 132, f1: 300, f2: 500, dur: 0.36, peak: 0.05 },
+    ooh: { pitch: 150, f1: 320, f2: 760, dur: 0.34, peak: 0.15 },
+    ahh: { pitch: 165, f1: 720, f2: 1180, dur: 0.30, peak: 0.15 },
+    uhh: { pitch: 150, f1: 540, f2: 1000, dur: 0.26, peak: 0.14 },
+    umm: { pitch: 140, f1: 360, f2: 600, dur: 0.34, peak: 0.13 },
+    hmm: { pitch: 132, f1: 300, f2: 500, dur: 0.36, peak: 0.13 },
   };
   function synthVowel(name) {
     const v = FORMANTS[name] || FORMANTS.ooh;
@@ -109,7 +109,7 @@ export function createGuideAudio() {
       osc.frequency.setValueAtTime(f, t + dt);
       osc.frequency.exponentialRampToValueAtTime(f * 1.45, t + dt + 0.12);
       g.gain.setValueAtTime(0.0001, t + dt);
-      g.gain.exponentialRampToValueAtTime(0.05, t + dt + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.12, t + dt + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dt + 0.2);
       osc.connect(g).connect(ctx.destination);
       osc.start(t + dt); osc.stop(t + dt + 0.22);
@@ -132,8 +132,8 @@ export function createGuideAudio() {
   /* ---- ambient bed: a quiet looped room tone (file: /audio/ambience.*),
      silent if the file is missing. Kept low on purpose, and ducks further
      while the guide is narrating so the voice sits forward. ---- */
-  const AMB_GAIN = 0.018; // subtle background bed - barely-there forest
-  const AMB_DUCKED = 0.007; // a whisper while the guide is talking
+  const AMB_GAIN = 0.07; // background bed - present, but still behind the voice
+  const AMB_DUCKED = 0.025; // pulled back while the guide is talking
   let ambient = null;
   // Cache the ENCODED file bytes (which are context-independent) and decode them
   // fresh against whatever AudioContext is live when a scene starts - so a buffer
