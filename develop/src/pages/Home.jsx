@@ -144,7 +144,7 @@ export default function Home() {
       </div>
 
       <footer className="footer">
-        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <span>© {new Date().getFullYear()} {profile.name} · source-available, reuse with credit, no full clones</span>
         <span className="footer-hint">
           <kbd>/</kbd> to navigate · <kbd className="footer-key">⌘</kbd><kbd>.</kbd> to toggle theme
         </span>
