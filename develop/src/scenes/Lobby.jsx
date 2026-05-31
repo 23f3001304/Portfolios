@@ -9,9 +9,12 @@ import { createGuideAudio } from './guideAudio.js';
 const BLURBS = {
   typereal: "TypeReal's a typing trainer built for speed. Seven modes, a real-time engine budgeted under 16 milliseconds a keystroke, a 1v1 duel over a live socket, and a ghost that races your own best run.",
   formdash: "Formdash is a form builder where the branching actually holds. One rule engine checks visibility in the editor, the live form, and the server, so nobody forges a hidden answer. Plus webhooks and real file validation.",
-  quizzy: "Quizzy is a Pydantic-AI agent framework for quizzes. It survived 22 of 24 adversarial evals, scoring 92 out of 100, across fifty-plus custom tools and a four-layer architecture.",
-  animy: "ANIMY turns a text prompt into a short animated video. A four-thread render farm pushed throughput up about ten clips an hour, and they dropped WebSockets for long-polling to keep it simple.",
+  quizzy: "Quizzy is a Pydantic-AI agent that solves a quiz end to end: a fast planner, a tool-using solver, and a sandbox that runs Python it writes on the fly. Ninety tools across twelve modules, and it graded 92 out of 100.",
+  animy: "ANIMY turns a text prompt into a short animated video. Four workers render in parallel while the browser polls for progress. WebSockets were too expensive to keep open for every user, and Heroku kept timing out the long polls, so each status request just returns fast with the current state.",
   'build-my-own-git': "This one is Git, rebuilt from scratch in Node. Six core commands producing byte-identical objects the real Git reads right back, SHA-1 and zlib and all.",
+  'build-my-own-shell': "Build My Own Shell is a POSIX shell in C++, written from the syscalls up. A read-parse-run loop, six built-ins, a PATH walk, and fork-plus-exec to launch real programs. No libraries past the standard one.",
+  'spider-man': "Spider-Man is a concept site for Into the Spider-Verse, designed in Figma. Chromatic comic-book title type, a Marvel marquee, and glassmorphism over Miles Morales art, all keyed off one tight palette.",
+  stic: "STIC is a brand and landing-page design for a student tech council. A red-and-cream editorial system, a big numbered section grid, and a full social asset kit, built to make a brand-new council look settled.",
 };
 
 // What the guide says when you click him directly - about Hemang or the oneko pet.

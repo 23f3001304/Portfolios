@@ -86,6 +86,10 @@
 }
 .floating-toolbar--right { right: var(--gap); }
 .floating-toolbar--left  { left:  var(--gap); }
+
+/* One height for every control so the volume pill, icon buttons, and theme
+   switch sit flush across the row (ambient + switch are already 30px). */
+.floating-toolbar .btn { height: 30px; }
 .floating-toolbar--center {
   left: 50%;
   transform: translateX(-50%);
@@ -122,22 +126,30 @@
     --btn-pad-y: 9px;
     --btn-pad-x: 9px;
     gap: 0;
+    height: 34px;
   }
   .floating-toolbar .btn > span:not(.kbd) { display: none; }
 
-  /* Ambient toggle: trim the visualizer so it doesn't dominate the row. */
+  /* Ambient toggle: compact pill with a slim visualizer so the inline row
+     breathes next to studio / story / contents / world + the theme switch. */
   .floating-toolbar .ambient-toggle {
-    height: 36px;
-    padding: 0 8px;
+    height: 34px;
+    padding: 0 9px;
+    gap: 6px;
   }
-  .floating-toolbar .ambient-vis { width: 36px; }
+  /* 3-class selector so it wins over the base .ambient-toggle .ambient-vis
+     regardless of source order. */
+  .floating-toolbar .ambient-toggle .ambient-vis { width: 26px; height: 15px; }
 
-  /* Theme switch: slightly smaller so the row fits well within the safe area. */
-  .theme-switch {
-    --switch-w: 56px;
-    --switch-h: 30px;
-    --thumb-size: 24px;
-    --thumb-inset: 3px;
+  /* Theme switch: 34px tall to align with the other controls, but a wider
+     track + slimmer thumb (with more inset) so it reads as a sleek toggle
+     rather than a fat pill. Scoped to .floating-toolbar so it beats the later
+     base .theme-switch vars. */
+  .floating-toolbar .theme-switch {
+    --switch-w: 64px;
+    --switch-h: 34px;
+    --thumb-size: 25px;
+    --thumb-inset: 4.5px;
   }
 }
 
@@ -187,23 +199,18 @@
 }
 .ambient-toggle[data-on="true"] .ambient-icon { color: var(--accent); }
 
-[data-theme="dark"] .ambient-toggle,
-:root:not([data-theme="light"]) .ambient-toggle {
+[data-theme="dark"] .ambient-toggle {
   background: #0d0e10;
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.6),
     inset 0 -1px 0 rgba(255, 255, 255, 0.04);
 }
-
-@media (max-width: 720px) {
-  .ambient-toggle {
-    height: 34px;
-    padding: 0 11px 0 9px;
-    gap: 9px;
-  }
-  .ambient-toggle .ambient-vis {
-    width: 60px;
-    height: 18px;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ambient-toggle {
+    background: #0d0e10;
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.6),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
   }
 }
 
@@ -263,8 +270,9 @@
 
 .theme-switch .thumb {
   position: absolute;
-  top: var(--thumb-inset);
+  top: 50%;
   left: var(--thumb-inset);
+  transform: translateX(0) translateY(-50%);
   width: var(--thumb-size);
   height: var(--thumb-size);
   border-radius: 50%;
@@ -280,7 +288,7 @@
   z-index: 1;
 }
 .theme-switch[data-on="true"] .thumb {
-  transform: translateX(calc(var(--switch-w) - var(--thumb-size) - var(--thumb-inset) * 2));
+  transform: translateX(calc(var(--switch-w) - var(--thumb-size) - var(--thumb-inset) * 2)) translateY(-50%);
 }
 .theme-switch .track,
 .theme-switch .icon {
@@ -298,39 +306,35 @@
 }
 
 /* Dark mode: invert the groove highlight */
-[data-theme="dark"] .theme-switch .track,
-:root:not([data-theme="light"]) .theme-switch .track {
+[data-theme="dark"] .theme-switch .track {
   background: #0d0e10;
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.6),
     inset 0 -1px 0 rgba(255, 255, 255, 0.04);
 }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-switch .track {
+    background: #0d0e10;
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.6),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+}
 
 /* ============================================
-   Table-of-contents control - ProjectToc portals
-   its trigger into #toc-slot. On project pages it
-   owns the centered row above the mode controls;
-   the slot collapses on non-project pages.
+   Table-of-contents control - the trigger sits
+   inline among the center toolbar buttons, mid-
+   row (ProjectToc portals it into #toc-slot).
+   `display: contents` lets it join the flex row
+   directly; the slot collapses on non-project
+   pages. The panel is styled in project-detail.css.
    ============================================ */
-.floating-toolbar--center {
-  flex-direction: column;
-  gap: 8px;
-}
-.ft-toc-slot { display: block; }
+.ft-toc-slot { display: contents; }
 .ft-toc-slot:empty { display: none; }
-.ft-modes {
-  display: flex;
-  gap: var(--gap-half);
-}
 
 .toc-trigger[data-open="true"] {
   color: var(--fg);
   background-color: var(--btn-bg-active);
   border-color: var(--btn-border-hover);
   box-shadow: var(--btn-shadow-active);
-}
-
-@media (max-width: 720px) {
-  /* Keep the bottom cluster tight after button labels collapse to icons. */
-  .ft-modes { display: flex; gap: 6px; }
 }

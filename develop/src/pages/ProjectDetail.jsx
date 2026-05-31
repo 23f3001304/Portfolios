@@ -4,6 +4,8 @@ import { useOneko } from '../useOneko.js';
 import { useDocumentTitle } from '../useDocumentTitle.js';
 import { Reveal } from '../components/Reveal.jsx';
 import { Figure } from '../components/Figure.jsx';
+import { CodeBlock } from '../components/CodeBlock.jsx';
+import { Diagram } from '../components/Diagram.jsx';
 import { ProjectToc } from '../components/ProjectToc.jsx';
 import { projects, projectBySlug } from '../data.js';
 
@@ -27,12 +29,13 @@ export default function ProjectDetail() {
   const toc = [
     { id: 'overview', label: 'Overview' },
     ...project.sections.map((s, i) => ({ id: `s-${i + 1}`, label: s.title })),
+    ...(project.conclusion?.length ? [{ id: 'conclusion', label: 'Conclusion' }] : []),
     ...(project.figma ? [{ id: 'figma', label: 'Figma board' }] : []),
     ...(project.links?.length ? [{ id: 'links', label: 'Links' }] : []),
   ];
 
   return (
-    <main className="shell wide proj">
+    <main className="shell wide proj" style={{ '--proj-accent': project.accent }}>
       <ProjectToc items={toc} accent={project.accent} />
       <Reveal as="header" className="proj-header">
         <div className="proj-meta-strip">
@@ -71,9 +74,25 @@ export default function ProjectDetail() {
             <h3>{s.title}</h3>
             <p>{s.body}</p>
             {s.figure && <Figure id={s.figure.id} caption={s.figure.caption} src={s.figure.src} alt={s.figure.alt} kind="PLACEHOLDER · IMG" />}
+            {s.blocks?.map((b, j) => (
+              b.kind === 'code'
+                ? <CodeBlock key={j} caption={b.caption} lang={b.lang} code={b.code} />
+                : b.kind === 'diagram'
+                  ? <Diagram key={j} id={b.id} caption={b.caption} />
+                  : null
+            ))}
           </div>
         </Reveal>
       ))}
+
+      {project.conclusion?.length > 0 && (
+        <Reveal as="section" className="proj-section" id="conclusion">
+          <div className="label">CONCLUSION</div>
+          <div className="body">
+            {project.conclusion.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
+        </Reveal>
+      )}
 
       {project.figma && (
         <Reveal as="section" className="proj-figma" id="figma">

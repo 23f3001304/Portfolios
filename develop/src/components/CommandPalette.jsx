@@ -38,9 +38,9 @@ const baseCommands = [
 ];
 
 const externalCommands = [
-  { id: 'github',   icon: '↗', label: 'Open GitHub',   hint: 'External', href: 'https://github.com/coehemang' },
+  { id: 'github',   icon: '↗', label: 'Open GitHub',   hint: 'External', href: 'https://github.com/23f3001304' },
   { id: 'linkedin', icon: '↗', label: 'Open LinkedIn', hint: 'External', href: 'https://linkedin.com/in/coehemang' },
-  { id: 'email',    icon: '✉', label: 'Send email',    hint: 'External', href: 'mailto:hemangc37@gmail.com' },
+  { id: 'email',    icon: '✉', label: 'Send email',    hint: 'External', href: 'mailto:coehemang@gmail.com' },
 ];
 
 export function CommandPalette() {
@@ -178,12 +178,15 @@ export function CommandPalette() {
   return (
     <>
       <button
-        className="btn"
+        className="btn cmd-trigger"
         onClick={() => setOpen(true)}
-        aria-label="Open command palette"
+        aria-label="Open menu"
       >
-        <span aria-hidden="true">⌘</span>
-        <span>Menu</span>
+        <svg className="cmd-burger" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+        </svg>
+        <span className="cmd-glyph" aria-hidden="true">⌘</span>
+        <span className="cmd-label">Menu</span>
         <span className="kbd">⌘K</span>
       </button>
 

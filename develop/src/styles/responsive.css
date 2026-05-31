@@ -20,6 +20,27 @@
   .proj-metrics .metric-cell { border-right: none; border-bottom: 1px solid var(--light-gray); }
   .proj-metrics .metric-cell:nth-child(odd) { border-right: 1px solid var(--light-gray); }
   .proj-metrics .metric-cell:nth-last-child(-n+2) { border-bottom: none; }
+
+  /* Full-bleed figures, code, and diagrams - run them edge-to-edge so they're
+     legible on a phone; captions tuck back to the text margin. */
+  .proj .figure,
+  .proj .codeblock,
+  .proj .gd-frame {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+  }
+  .proj .figure .frame-img-btn { border-radius: 0; }
+  .proj .figure .frame-img,
+  .proj .figure .frame,
+  .proj .codeblock,
+  .proj .gd-frame {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .proj .figure .caption { padding-inline: var(--gap); }
+
   .proj h1 { font-size: 1.875rem; }
   h1 { font-size: 1.75rem; }
   .nav-pill .item { padding: 5px 9px; font-size: 0.7rem; }

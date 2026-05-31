@@ -29,9 +29,13 @@ const IconFigma = () => (
 const IconLinks = () => (
   <svg {...SI}><path d="M8 16 16 8M9.5 8H16v6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
+const IconConclusion = () => (
+  <svg {...SI}><circle cx="12" cy="12" r="8.2" stroke="currentColor" strokeWidth="1.7" /><path d="M8.4 12.3l2.5 2.4 4.7-5.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
 
 function marker(item) {
   if (item.id === 'overview') return <IconOverview />;
+  if (item.id === 'conclusion') return <IconConclusion />;
   if (item.id === 'figma') return <IconFigma />;
   if (item.id === 'links') return <IconLinks />;
   const m = /^s-(\d+)$/.exec(item.id);

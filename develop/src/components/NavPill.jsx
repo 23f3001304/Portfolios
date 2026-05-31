@@ -7,7 +7,7 @@ const items = [
 ];
 
 const externals = [
-  { href: 'https://github.com/coehemang', label: 'github', hideOnSm: true },
+  { href: 'https://github.com/23f3001304', label: 'github', hideOnSm: true },
 ];
 
 export function NavPill() {

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useOneko } from '../useOneko.js';
 import { useDocumentTitle } from '../useDocumentTitle.js';
@@ -18,6 +19,11 @@ function Section({ id, label, children }) {
 export default function Home() {
   useOneko({ src: '/oneko/oneko-dog.gif' });
   useDocumentTitle();
+
+  const [showAllProjects, setShowAllProjects] = useState(false);
+  const FEATURED_COUNT = 4;
+  const visibleProjects = showAllProjects ? projects : projects.slice(0, FEATURED_COUNT);
+  const hasMoreProjects = projects.length > FEATURED_COUNT;
 
   return (
     <main className="shell">
@@ -63,7 +69,7 @@ export default function Home() {
 
         <Section id="projects" label="Projects">
           <div className="project-grid">
-            {projects.map((p, i) => (
+            {visibleProjects.map((p, i) => (
               <Reveal key={p.slug} className="project-card-wrap" style={{ '--i': i }}>
                 <Link
                   to={`/projects/${p.slug}`}
@@ -79,6 +85,17 @@ export default function Home() {
               </Reveal>
             ))}
           </div>
+          {hasMoreProjects && (
+            <button
+              type="button"
+              className="view-all-btn"
+              onClick={() => setShowAllProjects((v) => !v)}
+              aria-expanded={showAllProjects}
+            >
+              <span>{showAllProjects ? 'Show fewer' : `View all ${projects.length} projects`}</span>
+              <span className="chev" aria-hidden="true">{showAllProjects ? '↑' : '↓'}</span>
+            </button>
+          )}
         </Section>
 
         <Section id="skills" label="Skills">

@@ -60,17 +60,23 @@
   border-bottom: 1px solid var(--btn-border);
   transform: translateX(-50%) rotate(45deg);
 }
-[data-theme="dark"] #oneko-bubble,
-:root:not([data-theme="light"]) #oneko-bubble {
+[data-theme="dark"] #oneko-bubble {
   background: #1c1f25;
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.4),
     0 8px 22px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 var(--btn-inset-top);
 }
-[data-theme="dark"] #oneko-bubble::after,
-:root:not([data-theme="light"]) #oneko-bubble::after {
-  background: #1c1f25;
+[data-theme="dark"] #oneko-bubble::after { background: #1c1f25; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #oneko-bubble {
+    background: #1c1f25;
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.4),
+      0 8px 22px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 var(--btn-inset-top);
+  }
+  :root:not([data-theme="light"]) #oneko-bubble::after { background: #1c1f25; }
 }
 
 /* Oneko click-wake animation - runs once when the cat is clicked */

@@ -106,6 +106,33 @@
   gap: var(--gap-half);
 }
 .project-card-wrap { display: block; }
+.view-all-btn {
+  width: 100%;
+  margin-top: var(--gap-half);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--gray);
+  padding: calc(var(--gap) * 0.85) var(--gap);
+  border: 1px dashed var(--btn-border);
+  border-radius: var(--inline-radius);
+  background-color: transparent;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-out-quint),
+    background-color 200ms var(--ease-out-quint),
+    border-color 200ms var(--ease-out-quint);
+}
+.view-all-btn:hover {
+  color: var(--fg);
+  background-color: var(--btn-bg);
+  border-color: var(--btn-border-hover);
+}
+.view-all-btn .chev { color: var(--accent); font-size: 0.9em; }
 .project-card {
   display: grid;
   grid-template-columns: 5rem 1fr;

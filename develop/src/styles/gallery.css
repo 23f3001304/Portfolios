@@ -203,6 +203,30 @@
   font-size: 0.95rem;
   letter-spacing: -0.01em;
 }
+/* Mobile: tidy 2-column grid that fits all cards, with the scene able to scroll. */
+@media (max-width: 640px) {
+  .lobby {
+    justify-content: flex-start;
+    overflow-y: auto;
+    gap: var(--gap);
+    padding: calc(var(--big-gap) * 0.55) var(--gap) var(--gap);
+  }
+  .lobby-stage { min-height: 20vh; }
+  .guide-bob { width: clamp(104px, 32vw, 150px); }
+  .lobby-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 23rem;
+  }
+  .lobby-card {
+    padding: 0.5rem 0.7rem;
+    align-items: center;
+    text-align: center;
+  }
+  .lobby-card strong { font-size: 0.82rem; }
+}
 @media (prefers-reduced-motion: reduce) {
   .guide-bob { animation: none; }
   .guide { transition: none; transform: none; }

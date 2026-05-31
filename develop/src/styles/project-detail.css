@@ -193,8 +193,8 @@
 
 /* ============================================================
    Table of contents - a centered modal opened from the middle
-   toolbar. The overlay blurs the project page back so the section
-   list gets the same deliberate focus as the command palette.
+   toolbar control. A faint scrim (no blur) sets the section list
+   apart without hiding the page behind it.
    ============================================================ */
 .toc-overlay {
   position: fixed;
@@ -345,3 +345,93 @@
 .proj-nav a:hover { color: var(--fg); }
 .proj-nav .prev:hover { transform: translateX(-3px); }
 .proj-nav .next:hover { transform: translateX(3px); }
+
+/* ============================================================
+   Code listings + SVG diagrams - used in place of screenshots
+   on the Build-My-Own-Git page. Both inherit the project accent
+   through --proj-accent (set on .proj).
+   ============================================================ */
+.codeblock {
+  margin-top: var(--gap);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+}
+.codeblock-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-half);
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--light-gray);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+.codeblock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--proj-accent, var(--accent));
+}
+.codeblock-name { color: var(--gray); letter-spacing: 0.01em; }
+.codeblock-lang {
+  margin-left: auto;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6rem;
+  padding: 2px 7px;
+  border: 1px solid var(--btn-border);
+  border-radius: 999px;
+}
+.codeblock-pre {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--fg);
+  tab-size: 2;
+  scrollbar-width: thin;
+}
+.codeblock-pre code { font: inherit; white-space: pre; }
+.codeblock-pre:focus-visible { outline: 2px solid var(--proj-accent, var(--accent)); outline-offset: -3px; }
+.tok-comment { color: var(--gray); font-style: italic; }
+.tok-string  { color: var(--proj-accent, var(--accent)); }
+.tok-code    { color: var(--fg); }
+
+.gd { display: flex; flex-direction: column; gap: var(--gap-half); margin-top: var(--gap); }
+.gd-frame {
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--btn-inset-top);
+  padding: clamp(0.8rem, 2.5vw, 1.5rem);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+/* Wide, dense diagrams scroll rather than shrink below legibility on phones. */
+.gd-svg { display: block; width: 100%; min-width: 600px; height: auto; }
+.gd-cap {
+  display: flex;
+  gap: var(--gap-half);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--gray);
+}
+.gd-cap-id { color: var(--proj-accent, var(--accent)); }
+
+/* diagram primitives (SVG) */
+.gd-box { fill: var(--bg); stroke: color-mix(in oklab, var(--fg) 26%, transparent); stroke-width: 1.4; }
+.gd-box-acc {
+  fill: color-mix(in oklab, var(--proj-accent, var(--accent)) 10%, var(--surface));
+  stroke: var(--proj-accent, var(--accent));
+  stroke-width: 1.5;
+}
+.gd-edge { stroke: color-mix(in oklab, var(--fg) 34%, transparent); stroke-width: 1.5; fill: none; }
+.gd-arrow { fill: color-mix(in oklab, var(--fg) 46%, transparent); }
+.gd-mono { fill: var(--fg); font-family: var(--font-mono); }
+.gd-dim  { fill: var(--gray); font-family: var(--font-mono); }
+.gd-acc  { fill: var(--proj-accent, var(--accent)); font-family: var(--font-mono); }
