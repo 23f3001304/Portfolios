@@ -18,16 +18,13 @@ export const IMG_DIMS = {
   '/projects/formdash/publish-popover.png': [1882, 473],
   '/projects/formdash/responses.png': [2400, 1686],
   '/projects/formdash/templates.png': [2400, 1686],
-
   '/projects/spider-man/assets.png': [7344, 5168],
   '/projects/spider-man/details.png': [5600, 3600],
   '/projects/spider-man/home.png': [1400, 900],
-
   '/projects/stic/assets.png': [9184, 11420],
   '/projects/stic/hero.jpg': [7680, 4328],
   '/projects/stic/landing.jpg': [7680, 7112],
   '/projects/stic/landing-2.jpg': [7680, 3688],
-
   '/projects/typereal/code-mode.png': [2880, 1800],
   '/projects/typereal/dashboard.png': [2880, 1800],
   '/projects/typereal/duel.png': [2880, 1800],

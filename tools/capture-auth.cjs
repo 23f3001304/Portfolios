@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', 'develop'); // scripts live in ../tools, the app in ../develop
 const COOKIES = path.join(ROOT, '.auth', 'cookies.json');
 const OUT = path.join(ROOT, 'public', 'projects');
 

@@ -8,8 +8,11 @@
 import sharp from 'sharp';
 import { readdir, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const DIR = path.resolve('../public/world');
+// This tool lives in ../tools; the images it optimises are in ../develop/public/world.
+const DEV = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'develop');
+const DIR = path.join(DEV, 'public', 'world');
 const QUALITY = Number(process.argv[2]) || 82; // pass a number to override, e.g. `node scripts/optimize-world.mjs 80`
 
 const files = (await readdir(DIR)).filter((f) => /\.(jpe?g|png)$/i.test(f));

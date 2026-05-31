@@ -11,11 +11,13 @@
  */
 import { readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
-const WORLD_DIR = path.resolve('public/world');
-const OUT = path.resolve('src/worldData.js');
+// This tool lives in ../tools; the app it writes into is ../develop.
+const DEV = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'develop');
+const WORLD_DIR = path.join(DEV, 'public', 'world');
+const OUT = path.join(DEV, 'src', 'worldData.js');
 const WORLD_V = 2; // cache-bust query for the non-fingerprinted /world/* assets
 
 // 1. Carry forward any `taken` dates already in the manifest (keyed by filename).
