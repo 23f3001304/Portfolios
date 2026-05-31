@@ -19,7 +19,7 @@ const BLURBS = {
 
 // What the guide says when you click him directly - about Hemang or the oneko pet.
 const GUIDE_LINES = [
-  "You're in Hemang's portfolio. Backend systems, ML pipelines, and the occasional weird side-project.",
+  "You're in Hemang's portfolio. Full-stack apps, ML pipelines, and the occasional weird side-project.",
   "Hemang trained CycleGANs at DRDO, then wrote Git from scratch in Node because the manual wasn't enough.",
   "He's doing a B.Tech at MBM and a parallel B.S. in Data Science at IIT Madras. Busy guy.",
   "See that pixel dog chasing your cursor on the main page? That's oneko. Click it, it barks and tells you things.",

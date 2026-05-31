@@ -1,6 +1,6 @@
 export const profile = {
   name: 'Hemang Choudhary',
-  role: 'B.Tech IT · Backend & ML systems',
+  role: 'B.Tech IT · Full-Stack & ML systems',
   location: 'Jodhpur, IN',
   email: 'coehemang@gmail.com',
   altEmail: 'hemangc37@gmail.com',

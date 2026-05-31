@@ -12,7 +12,7 @@ if (typeof window !== 'undefined' && !window.__signed) {
   const small = 'color: #888; font: 11px/1.4 ui-monospace, "SF Mono", Menlo, monospace';
   // eslint-disable-next-line no-console
   console.log(
-    '%cHemang Choudhary\n%cBackend systems, ML pipelines, weird side-projects.\nGitHub: github.com/23f3001304\nMail:   coehemang@gmail.com',
+    '%cHemang Choudhary\n%cFull-stack apps, ML pipelines, weird side-projects.\nGitHub: github.com/23f3001304\nMail:   coehemang@gmail.com',
     big, small
   );
 }
