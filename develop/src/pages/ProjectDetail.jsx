@@ -9,6 +9,17 @@ import { Diagram } from '../components/Diagram.jsx';
 import { ProjectToc } from '../components/ProjectToc.jsx';
 import { projects, projectBySlug } from '../data.js';
 
+// Surface a project's primary external links as quick "visit X" header shortcuts.
+const VISIT_RULES = [
+  { test: /^(website|live|demo|site|visit)$/i, label: 'visit site' },
+  { test: /^figma$/i, label: 'visit figma' },
+  { test: /^github$/i, label: 'visit github' },
+];
+function visitLabel(label) {
+  const rule = VISIT_RULES.find((r) => r.test.test(label || ''));
+  return rule ? rule.label : null;
+}
+
 export default function ProjectDetail() {
   const { slug } = useParams();
   const project = projectBySlug[slug];
@@ -34,6 +45,11 @@ export default function ProjectDetail() {
     ...(project.links?.length ? [{ id: 'links', label: 'Links' }] : []),
   ];
 
+  const headerLinks = (project.links || [])
+    .filter((l) => l.href && l.href !== '#')
+    .map((l) => ({ href: l.href, label: visitLabel(l.label) }))
+    .filter((l) => l.label);
+
   return (
     <main className="shell wide proj" style={{ '--proj-accent': project.accent }}>
       <ProjectToc items={toc} accent={project.accent} />
@@ -42,6 +58,15 @@ export default function ProjectDetail() {
           <span className="kv"><span className="k">ID</span> <span className="v">{project.id}</span></span>
           <span className="kv"><span className="k">PERIOD</span> <span className="v">{project.when}</span></span>
           <span className="kv"><span className="k">STATUS</span> <span className="v" style={{ color: project.accent }}>{project.status}</span></span>
+          {headerLinks.length > 0 && (
+            <span className="proj-visits">
+              {headerLinks.map((l) => (
+                <a key={l.label} className="proj-visit" href={l.href} target="_blank" rel="noreferrer">
+                  {l.label} <span aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </span>
+          )}
         </div>
         <h1>{project.name}</h1>
         <p className="tagline">{project.tagline}</p>

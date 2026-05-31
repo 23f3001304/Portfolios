@@ -97,10 +97,32 @@ export function ProjectToc({ items, accent }) {
     const el = document.getElementById(id);
     if (!el) return;
     setActiveId(id);
-    lockUntil.current = performance.now() + 1150;
+    const OFFSET = -88;
     const lenis = window.__lenis;
-    if (lenis) lenis.scrollTo(el, { offset: -88, duration: 1.1 });
-    else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    lockUntil.current = performance.now() + 1400;
+
+    if (lenis) {
+      // Lenis fixes the target from the element's position at call time, but
+      // lazy images loading mid-scroll shift the layout and leave the jump
+      // short. After the glide, re-target a few times (paced, so images get a
+      // chance to finish) until the section actually sits at the offset - or we
+      // converge / hit the page bottom / the user has scrolled away.
+      let tries = 0;
+      const settle = () => {
+        const drift = el.getBoundingClientRect().top + OFFSET;
+        const atBottom = window.scrollY + window.innerHeight
+          >= document.documentElement.scrollHeight - 2;
+        if (Math.abs(drift) <= 2 || atBottom || tries >= 8
+          || Math.abs(drift) > window.innerHeight * 1.5) return;
+        tries += 1;
+        lockUntil.current = performance.now() + 700;
+        lenis.scrollTo(el, { offset: OFFSET, duration: 0.3, onComplete: () => setTimeout(settle, 120) });
+      };
+      lenis.scrollTo(el, { offset: OFFSET, duration: 1.1, onComplete: () => setTimeout(settle, 120) });
+    } else {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     if (window.history?.replaceState) window.history.replaceState(null, '', `#${id}`);
     setOpen(false);
   }

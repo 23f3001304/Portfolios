@@ -121,7 +121,6 @@ export const projects = [
     figma: null,
     links: [
       { label: 'Website', href: 'https://typereal.coehemang.dev' },
-      { label: 'GitHub',  href: 'https://github.com/23f3001304' },
     ],
   },
   {
@@ -202,7 +201,6 @@ export const projects = [
     figma: null,
     links: [
       { label: 'Website', href: 'https://formdash.coehemang.dev' },
-      { label: 'GitHub',  href: 'https://github.com/23f3001304' },
     ],
   },
   {

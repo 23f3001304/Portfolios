@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLightbox } from './LightboxProvider.jsx';
+import { IMG_DIMS } from '../imageDims.js';
 
 /*
  * A captioned figure. When `src` is provided the image registers itself with
@@ -40,7 +41,14 @@ export function Figure({ id, caption, kind = 'PLACEHOLDER · IMAGE', src, alt })
         onClick={() => lb?.open(fid)}
         aria-label={`Enlarge ${alt || caption || id || 'image'}`}
       >
-        <img className="frame-img" src={src} alt={alt || caption || id || ''} loading="lazy" />
+        <img
+          className="frame-img"
+          src={src}
+          alt={alt || caption || id || ''}
+          loading="lazy"
+          width={IMG_DIMS[src]?.[0]}
+          height={IMG_DIMS[src]?.[1]}
+        />
         <span className="frame-zoom-hint" aria-hidden="true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />

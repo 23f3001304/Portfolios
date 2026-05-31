@@ -17,6 +17,20 @@
 .proj-meta-strip .kv { display: inline-flex; gap: 4px; }
 .proj-meta-strip .kv .k { opacity: 0.5; }
 .proj-meta-strip .kv .v { color: var(--fg); }
+.proj-meta-strip .proj-visits {
+  margin-left: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+.proj-meta-strip .proj-visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--proj-accent, var(--accent));
+  text-decoration: none;
+}
+.proj-meta-strip .proj-visit:hover { text-decoration: underline; }
 .proj h1 {
   font-size: 2.5rem;
   letter-spacing: -0.045em;
