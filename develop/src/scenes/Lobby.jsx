@@ -7,6 +7,8 @@ import { createGuideAudio } from './guideAudio.js';
 
 // The guide's project pitches - a couple of sentences each, spoken aloud.
 const BLURBS = {
+  adarag: "AdaRag is multimodal RAG that runs on one machine. Drop in text, code, a PDF, an image, audio, or video, and it answers with citations - and when a citation is an image, it hands the model the actual pixels, not a caption of them. Local bge-m3 embeddings, a Qdrant hybrid store, a cross-encoder reranker, and an Optuna optimizer that tunes the whole thing against latency.",
+  'contrib-console': "contrib.console is a local control panel for steering an AI through real open source. It finds repos with good first issues, makes one small commit at a time, and stops at each for your review. Your token never leaves the machine, and nothing gets pushed until you approve the diff and write the PR yourself.",
   typereal: "TypeReal's a typing trainer built for speed. Seven modes, a real-time engine budgeted under 16 milliseconds a keystroke, a 1v1 duel over a live socket, and a ghost that races your own best run.",
   formdash: "Formdash is a form builder where the branching actually holds. One rule engine checks visibility in the editor, the live form, and the server, so nobody forges a hidden answer. Plus webhooks and real file validation.",
   quizzy: "Quizzy is a Pydantic-AI agent that solves a quiz end to end: a fast planner, a tool-using solver, and a sandbox that runs Python it writes on the fly. Ninety tools across twelve modules, and it graded 92 out of 100.",
@@ -15,6 +17,7 @@ const BLURBS = {
   'build-my-own-shell': "Build My Own Shell is a POSIX shell in C++, written from the syscalls up. A read-parse-run loop, six built-ins, a PATH walk, and fork-plus-exec to launch real programs. No libraries past the standard one.",
   'spider-man': "Spider-Man is a concept site for Into the Spider-Verse, designed in Figma. Chromatic comic-book title type, a Marvel marquee, and glassmorphism over Miles Morales art, all keyed off one tight palette.",
   stic: "STIC is a brand and landing-page design for a student tech council. A red-and-cream editorial system, a big numbered section grid, and a full social asset kit, built to make a brand-new council look settled.",
+  menthub: "MentHub is a community Q&A platform designed in Figma for MBM University. An identity-verified signup for students and teachers, an upvote-ranked question feed with deep filters, shared Drive resources, and a campus events board. Calm blue onboarding, a warm coral app.",
 };
 
 // What the guide says when you click him directly - about Hemang or the oneko pet.

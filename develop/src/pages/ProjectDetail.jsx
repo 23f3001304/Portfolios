@@ -40,8 +40,8 @@ export default function ProjectDetail() {
   const toc = [
     { id: 'overview', label: 'Overview' },
     ...project.sections.map((s, i) => ({ id: `s-${i + 1}`, label: s.title })),
-    ...(project.conclusion?.length ? [{ id: 'conclusion', label: 'Conclusion' }] : []),
     ...(project.figma ? [{ id: 'figma', label: 'Figma board' }] : []),
+    ...(project.conclusion?.length ? [{ id: 'conclusion', label: 'Conclusion' }] : []),
     ...(project.links?.length ? [{ id: 'links', label: 'Links' }] : []),
   ];
 
@@ -110,15 +110,6 @@ export default function ProjectDetail() {
         </Reveal>
       ))}
 
-      {project.conclusion?.length > 0 && (
-        <Reveal as="section" className="proj-section" id="conclusion">
-          <div className="label">CONCLUSION</div>
-          <div className="body">
-            {project.conclusion.map((p, i) => <p key={i}>{p}</p>)}
-          </div>
-        </Reveal>
-      )}
-
       {project.figma && (
         <Reveal as="section" className="proj-figma" id="figma">
           <div className="label">FIGMA</div>
@@ -130,6 +121,15 @@ export default function ProjectDetail() {
               alt={project.figma.alt}
               kind="PLACEHOLDER · FIGMA"
             />
+          </div>
+        </Reveal>
+      )}
+
+      {project.conclusion?.length > 0 && (
+        <Reveal as="section" className="proj-section" id="conclusion">
+          <div className="label">CONCLUSION</div>
+          <div className="body">
+            {project.conclusion.map((p, i) => <p key={i}>{p}</p>)}
           </div>
         </Reveal>
       )}
