@@ -79,3 +79,14 @@ body { min-height: 100vh; }
   padding: var(--small-gap) var(--gap) var(--big-gap);
 }
 .shell.wide { max-width: var(--wide-content); }
+
+/* ============================================
+   Smart-invert for dark-UI screenshots
+   ============================================
+   The app projects only have dark-mode captures; under the light theme
+   any image carrying .invert-light flips to read as a light-mode UI
+   (same trick as the generated product shots / iOS Smart Invert). */
+[data-theme="light"] .invert-light { filter: invert(1) hue-rotate(180deg); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .invert-light { filter: invert(1) hue-rotate(180deg); }
+}

@@ -66,7 +66,7 @@ export function Lightbox() {
           key={item.id}
           src={item.src}
           alt={item.alt || item.caption || ''}
-          className="lightbox-img"
+          className={item.invert ? 'lightbox-img invert-light' : 'lightbox-img'}
           draggable="false"
         />
         {(item.label || item.caption) && (

@@ -2,6 +2,8 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useOneko } from '../useOneko.js';
 import { useDocumentTitle } from '../useDocumentTitle.js';
+import { useTheme } from '../theme.js';
+import { IMG_DIMS } from '../imageDims.js';
 import { Reveal } from '../components/Reveal.jsx';
 import { Figure } from '../components/Figure.jsx';
 import { CodeBlock } from '../components/CodeBlock.jsx';
@@ -23,6 +25,7 @@ function visitLabel(label) {
 export default function ProjectDetail() {
   const { slug } = useParams();
   const project = projectBySlug[slug];
+  const theme = useTheme();
 
   useOneko({ src: '/oneko/oneko-dog.gif' });
   useDocumentTitle(project?.name);
@@ -49,6 +52,9 @@ export default function ProjectDetail() {
     .filter((l) => l.href && l.href !== '#')
     .map((l) => ({ href: l.href, label: visitLabel(l.label) }))
     .filter((l) => l.label);
+
+  // Product shot in the feel that matches the active theme.
+  const heroSrc = project.hero ? project.hero[theme] : null;
 
   return (
     <main className="shell wide proj" style={{ '--proj-accent': project.accent }}>
@@ -77,6 +83,18 @@ export default function ProjectDetail() {
         </div>
       </Reveal>
 
+      {heroSrc && (
+        <Reveal className="proj-hero">
+          <img
+            src={heroSrc}
+            alt={`${project.name} running in a browser window`}
+            width={IMG_DIMS[heroSrc]?.[0]}
+            height={IMG_DIMS[heroSrc]?.[1]}
+            decoding="async"
+          />
+        </Reveal>
+      )}
+
       <Reveal className="proj-metrics" role="list" aria-label="Project metrics">
         {project.metrics.map((m, i) => (
           <div className="metric-cell" role="listitem" key={i}>
@@ -98,7 +116,16 @@ export default function ProjectDetail() {
           <div className="body">
             <h3>{s.title}</h3>
             <p>{s.body}</p>
-            {s.figure && <Figure id={s.figure.id} caption={s.figure.caption} src={s.figure.src} alt={s.figure.alt} kind="PLACEHOLDER · IMG" />}
+            {s.figure && (
+              <Figure
+                id={s.figure.id}
+                caption={s.figure.caption}
+                src={s.figure.src}
+                alt={s.figure.alt}
+                kind="PLACEHOLDER · IMG"
+                invert={!!project.invertShotsInLight && !s.figure.noInvert}
+              />
+            )}
             {s.blocks?.map((b, j) => (
               b.kind === 'code'
                 ? <CodeBlock key={j} caption={b.caption} lang={b.lang} code={b.code} />

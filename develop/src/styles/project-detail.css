@@ -45,6 +45,18 @@
 }
 .proj-stack { display: flex; flex-wrap: wrap; gap: var(--gap-half); }
 
+/* Product shot - the app framed in a browser window on a styled backdrop
+   (scripts/product-shots.mjs). The light/dark feel follows the site theme. */
+.proj-hero {
+  margin-top: calc(var(--gap-double) - var(--small-gap));
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.proj-hero img { display: block; width: 100%; height: auto; }
+
 .proj-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -119,6 +131,15 @@
 
 /* Figure placeholder - quieter */
 .figure { display: flex; flex-direction: column; gap: var(--gap-half); margin-top: var(--gap-half); }
+
+/* Desktop: exhibits break out of the body column and span the full content
+   width - prose keeps the narrow measure, screenshots get the whole shell.
+   (Mobile full-bleed in responsive.css overrides this.) */
+.proj-section .figure,
+.proj-figma .figure {
+  width: calc(100% + 8rem + var(--gap-double));
+  margin-left: calc(-8rem - var(--gap-double));
+}
 .figure .frame {
   position: relative;
   width: 100%;

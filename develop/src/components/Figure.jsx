@@ -7,15 +7,15 @@ import { IMG_DIMS } from '../imageDims.js';
  * the page-wide lightbox on mount and opens it on click, so the viewer can
  * step through every figure on the page with prev/next.
  */
-export function Figure({ id, caption, kind = 'PLACEHOLDER · IMAGE', src, alt }) {
+export function Figure({ id, caption, kind = 'PLACEHOLDER · IMAGE', src, alt, invert = false }) {
   const lb = useLightbox();
   const fid = id || src;
   const register = lb?.register;
 
   useEffect(() => {
     if (!src || !register) return undefined;
-    return register({ id: fid, src, alt: alt || caption || id || '', caption, label: id });
-  }, [src, fid, alt, caption, register]);
+    return register({ id: fid, src, alt: alt || caption || id || '', caption, label: id, invert });
+  }, [src, fid, alt, caption, register, invert]);
 
   const label = (id || caption) ? (
     <figcaption className="caption">
@@ -42,7 +42,7 @@ export function Figure({ id, caption, kind = 'PLACEHOLDER · IMAGE', src, alt })
         aria-label={`Enlarge ${alt || caption || id || 'image'}`}
       >
         <img
-          className="frame-img"
+          className={invert ? 'frame-img invert-light' : 'frame-img'}
           src={src}
           alt={alt || caption || id || ''}
           loading="lazy"

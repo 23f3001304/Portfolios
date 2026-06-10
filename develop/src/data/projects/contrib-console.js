@@ -13,6 +13,11 @@ export const contribConsole = {
     { value: '0',  unit: '',  label: 'pushes without your approval' },
   ],
   accent: '#e07d1a',
+  hero: {
+    light: '/projects/contrib-console/product-tilt-light.webp',
+    dark: '/projects/contrib-console/product-tilt-dark.webp',
+  },
+  invertShotsInLight: true,
   overview: [
     'contrib.console is a local-first control panel for steering an AI through real open-source contributions. You set target languages, it suggests repositories with good first issues, you approve the ones worth your time and queue an issue, and a worker makes one small commit toward it - then stops. Every commit lands in a review inbox with its diff and a per-file note; you approve or request changes, and only once you write the PR description does the dashboard push and open it as you.',
     'It is built to be boring on purpose. Your GitHub token lives in a dev-server env file, read only on the host and never shipped to the browser. The worker is Claude Code running in an embedded terminal, talking to the dashboard through plain JSON files in a pipeline directory rather than a remote queue. Commits stay local - the worker is blocked from any network git call - so nothing leaves your machine until you approve a diff and open the PR yourself.',

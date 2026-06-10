@@ -13,6 +13,11 @@ export const formdash = {
     { value: '7',  unit: '+', label: 'anti-abuse guards' },
   ],
   accent: '#5c7cfa',
+  hero: {
+    light: '/projects/formdash/product-tilt-light.webp',
+    dark: '/projects/formdash/product-tilt-dark.webp',
+  },
+  invertShotsInLight: true,
   overview: [
     'Formdash takes the boring parts of forms seriously: branching that holds, responses that can\'t be forged, and uploads that are what they claim to be. You drag questions onto a canvas, wire up show/hide rules, publish to a public URL, and watch responses land with per-question analytics.',
     'It is a pnpm monorepo - a React client on Vite with Tailwind and shadcn primitives, and an Express API on Prisma. The web tier deploys to Cloudflare Pages, the API to Heroku with Postgres, and files go to any S3-compatible bucket through one storage driver.',

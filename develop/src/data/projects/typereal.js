@@ -13,6 +13,11 @@ export const typereal = {
     { value: '0',  unit: '',   label: 'signup to start typing' },
   ],
   accent: '#ff6b35',
+  hero: {
+    light: '/projects/typereal/product-flat-light.webp',
+    dark: '/projects/typereal/product-flat-dark.webp',
+  },
+  invertShotsInLight: true,
   overview: [
     'TypeReal is a typing-speed trainer in the Monkeytype lineage, rebuilt around one obsession: the gap between a key going down and the glyph turning correct should never be felt. The input path is built to land inside a single 60 Hz frame - each keystroke colours its character and moves the caret on the same synchronous keydown, with no async or animation-frame step in between.',
     'It runs as a monorepo - a React + TypeScript client on Vite, and a Fastify API with Prisma and Lucia sessions, signed into by a magic-link email or a Google popup verified through Firebase. Guests type immediately; signing in unlocks history, a 1v1 duel, and a ghost that races your own best run.',

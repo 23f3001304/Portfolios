@@ -13,6 +13,11 @@ export const adarag = {
     { value: '600',  unit: 'ms', label: 'checkpoints, survives a crash' },
   ],
   accent: '#6fae0f',
+  hero: {
+    light: '/projects/adarag/product-flat-light.webp',
+    dark: '/projects/adarag/product-flat-dark.webp',
+  },
+  invertShotsInLight: true,
   overview: [
     'AdaRag is a multimodal RAG system that runs entirely on one workstation. You drop in text, code, a PDF, an image, audio, or video; it detects the modality and turns the file into a text surrogate - vision-captioned and OCR\'d for an image, transcribed for audio or video, parsed for a PDF - then indexes it in a single hybrid vector store. Ask a question and it retrieves, reranks with a cross-encoder, and answers with citations; when a citation is an image or video, the original media rides along in the prompt so a vision-capable model reads the actual pixels, not a caption of them.',
     'Under the hood it is three processes: a Next.js front end, a FastAPI service over Qdrant and Postgres, and a host CLI bridge that owns claude-cli, gemini-cli, and Ollama. The split is deliberate - the API container can\'t reach the host\'s logged-in CLIs, so the bridge proxies them over HTTP, which is what lets a free Claude subscription pay for chat while Ollama handles the cheap per-chunk enrichment. The whole index lives on disk and never leaves it.',
