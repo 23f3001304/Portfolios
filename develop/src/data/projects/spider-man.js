@@ -14,6 +14,10 @@ export const spiderMan = {
   ],
   sprite: '/oneko/oneko-maia.gif',
   accent: '#e23636',
+  hero: {
+    light: '/projects/spider-man/product-tilt-light.webp',
+    dark: '/projects/spider-man/product-tilt-dark.webp',
+  },
   overview: [
     'Spider-Man is a concept landing site for Into the Spider-Verse, designed end to end in Figma. The brief I set myself: catch the film\'s comic-book energy without the layout turning into noise. The answer was a tight system - one loud red, a chromatic display face for the title, and clean glass panels that let the character art carry the page.',
     'The work spans a hero, a details view, and a shared asset board that pins down the marquee, the mini character card, the button, and the color tokens. Everything keys off a single palette, so the Home and Details screens read as one product rather than two posters.',

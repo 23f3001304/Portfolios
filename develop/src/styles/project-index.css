@@ -1,0 +1,298 @@
+/* ============================================================
+   Project index (/projects) - the wall of cards.
+   ============================================================
+   Home keeps its flat two-column rows; thirteen of them on one
+   page read as a spreadsheet. So the index gets cards - but
+   built the way everything else here is built: a well recessed
+   INTO the page, not a slab floating above it. Same --btn-*
+   tokens as the ⌘ Menu pill and the switch track, so a card
+   presses in under the cursor like every other control. The
+   picture is a plate seated inside that well, which is why the
+   card carries a gutter instead of running the image to its
+   edge. Scoped to .pgrid, so home is untouched. */
+
+/* ============================================
+   Filter chips
+   ============================================
+   Ordinary .btn pills. Selected means pressed in - in a recessed language
+   that is the whole affordance, so an active chip needs no colour of its
+   own and the row stays quiet while it is doing something. */
+.pfilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-half);
+  align-items: center;
+}
+.pchip .num {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.5;
+}
+.pchip[aria-pressed='true'] {
+  color: var(--fg);
+  background-color: var(--btn-bg-active);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-active);
+}
+.pchip[aria-pressed='true'] .num { opacity: 0.75; }
+/* A chip that would empty the page is shown, not hidden: the count is the
+   information. It just can't be pressed. */
+.pchip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.pchip:disabled:hover {
+  color: var(--gray);
+  background-color: var(--btn-bg);
+  border-color: var(--btn-border);
+}
+.pchip-chev {
+  font-family: var(--font-mono);
+  opacity: 0.55;
+  margin-left: 0.15rem;
+}
+.pchip--clear { color: var(--accent); }
+
+/* The advanced tray. Two labelled rows rather than one long wrap, so "Tech"
+   and "Order" don't read as one undifferentiated pile of chips. */
+.pfilter--adv {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--gap-half);
+  margin-top: var(--gap-half);
+  padding: calc(var(--gap) * 0.8) var(--gap);
+  border: 1px solid var(--btn-border);
+  border-radius: 12px;
+  background-color: var(--btn-bg);
+  box-shadow: var(--btn-shadow);
+  animation: pfilter-open 260ms var(--ease-out-quint);
+}
+@keyframes pfilter-open {
+  from { opacity: 0; transform: translate3d(0, -6px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pfilter--adv { animation: none; }
+}
+.pfilter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-half);
+  align-items: center;
+}
+.pfilter-label {
+  flex: none;
+  width: 3.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gray);
+  opacity: 0.7;
+}
+.pcount {
+  margin-top: var(--gap-half);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--gray);
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.pempty {
+  padding: var(--big-gap) 0;
+  text-align: center;
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+.plink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ============================================
+   Grid
+   ============================================ */
+.pgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--gap-double);
+  align-items: stretch;
+}
+/* The Reveal wrapper is a real grid item, so it has to pass its own height
+   down or every card would shrink-wrap its text. */
+.pgrid .project-card-wrap { display: block; height: 100%; }
+
+/* ============================================
+   The card - a well
+   ============================================ */
+.pbox {
+  /* Each project carries its own accent; --accent covers the few that don't.
+     It stays out of the resting card - it belongs to the picture and to the
+     hover, not to a badge. */
+  --tint: var(--card-accent, var(--accent));
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem;
+  border: 1px solid var(--btn-border);
+  border-radius: 14px;
+  background-color: var(--btn-bg);
+  background-image: var(--btn-sheen);
+  box-shadow: var(--btn-shadow);
+  text-decoration: none;
+  color: var(--fg);
+  transition:
+    background-color 220ms var(--ease-out-quint),
+    box-shadow 220ms var(--ease-out-quint),
+    border-color 220ms var(--ease-out-quint);
+}
+.pbox:hover {
+  text-decoration: none;
+  background-color: var(--btn-bg-hover);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+.pbox:active {
+  background-color: var(--btn-bg-active);
+  box-shadow: var(--btn-shadow-active);
+}
+.pbox:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Media - the plate seated in the well
+   ============================================
+   3/2 is the shots' own ratio, so nothing is cropped. */
+.pbox-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 9px;
+  border: 1px solid var(--btn-border);
+  background-color: var(--lightest-gray);
+  transition: border-color 220ms var(--ease-out-quint);
+}
+.pbox:hover .pbox-media {
+  border-color: color-mix(in oklab, var(--tint) 32%, var(--btn-border));
+}
+.pbox-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition:
+    transform 640ms var(--ease-out-quint),
+    filter 520ms var(--ease-out-quint);
+}
+/* The canvas does not scale with the <img> it covers, so while the WebGL
+   reveal is mounted the zoom is off - otherwise the picture jumps by 3.5% the
+   moment the canvas detaches. */
+.pbox:hover .pbox-media:not([data-gl]) img { transform: scale(1.035); }
+
+/* ============================================
+   Black and white at rest, colour on hover
+   ============================================
+   Thirteen full-colour screenshots compete with the page they sit in. At rest
+   each one is plain greyscale, so the wall reads as page material like the
+   recessed wells around it - and the real picture, gradient backdrop and all,
+   arrives under the cursor. Nothing but grayscale(): a contrast tweak on top
+   of it crushed the shadows in shots that are mostly dark UI already, and the
+   WebGL layer would then have to reproduce the same curve exactly to avoid a
+   jump when it mounts. */
+.pbox-media img { filter: grayscale(1); }
+.pbox:hover .pbox-media:not([data-gl]) img { filter: none; }
+
+/* The WebGL layer (src/useCardReveal.js) covers the <img> and floods the
+   colour in from the cursor. One canvas, adopted by whichever card is hovered.
+   While it is mounted the <img> underneath must stay grey - the :not() above
+   is what stops the CSS swap firing behind it and popping the colour in early,
+   before the shader has drawn a frame. */
+.pbox-gl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Nothing to hover with, so nothing to reveal: touch gets the picture. */
+@media (hover: none) {
+  .pbox-media img { filter: none; }
+}
+
+/* ============================================
+   Body
+   ============================================ */
+.pbox-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  padding: 0.95rem 0.5rem 0.55rem;
+}
+/* Quiet mono meta, the same register as the page's own INDEX / COUNT strip.
+   This used to carry an accent dot per status, which made thirteen cards
+   read as thirteen notifications. */
+.pbox-top {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-half);
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+  margin-bottom: 1px;
+}
+.pbox-top .pbox-id { opacity: 0.62; }
+.pbox-status { margin-left: auto; }
+.pbox-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+.pbox-tagline {
+  font-size: 0.84rem;
+  color: var(--gray);
+  line-height: 1.45;
+  /* Clamped so a long tagline can't make one card tower over its neighbour. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pbox-go {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--gray);
+  transition:
+    color 260ms var(--ease-out-quint),
+    transform 260ms var(--ease-out-quint);
+}
+.pbox:hover .pbox-go {
+  color: var(--tint);
+  transform: translateX(3px);
+}
+
+/* A project with no picture at all keeps the same well, just no plate in it. */
+.pbox--text .pbox-body { padding: 1.5rem 0.5rem; gap: 0.4rem; }
+.pbox--text .pbox-name { font-size: 1.15rem; }
+.pgrid .project-card-wrap:has(.pbox--text) {
+  align-self: start;
+  /* height:100% above would resolve against the row again and undo this. */
+  height: auto;
+}

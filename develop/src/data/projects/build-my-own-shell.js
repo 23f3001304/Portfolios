@@ -14,6 +14,13 @@ export const buildMyOwnShell = {
   ],
   sprite: '/oneko/oneko-dog.gif',
   accent: '#e0a106',
+  // No product shot to take - so a typographic poster instead
+  // (scripts/posters.mjs), drawn in this project's own accent.
+  hero: {
+    light: '/projects/build-my-own-shell/poster-light.webp',
+    dark: '/projects/build-my-own-shell/poster-dark.webp',
+  },
+  heroAlt: 'Poster: a shell prompt and block cursor, over the four syscalls that run behind it',
   overview: [
     'Build Your Own Shell is the program behind the $ prompt, written from the syscalls up in C++. It reads a line, decides whether the first word is one of its own built-ins or a program living somewhere on `$PATH`, and either handles it in-process or forks a child to run it. No readline, no libraries past the standard library and POSIX.',
     'The whole thing is a read-eval-print loop. `echo`, `pwd`, `cd`, `cat`, `type`, and `exit` are built in; everything else is resolved by walking `$PATH` and run through `fork` plus `execvp`, with the parent waiting on the child. A hand-written scanner handles the quoting and backslash escapes that make `echo \'a b\'` and `echo a\\ b` come out right.',

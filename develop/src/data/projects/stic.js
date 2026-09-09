@@ -14,6 +14,10 @@ export const stic = {
   ],
   sprite: '/oneko/oneko-classic.gif',
   accent: '#c0463a',
+  hero: {
+    light: '/projects/stic/product-tilt-light.webp',
+    dark: '/projects/stic/product-tilt-dark.webp',
+  },
   overview: [
     'STIC is the brand and web design for the Student Tech Innovation Council at M.B.M. University, Jodhpur. It is a reboot: a clearer identity, a warm red-on-cream palette, and a confident wordmark, built to make a new student council look like it has been around for years.',
     'The centerpiece is a long landing page that reads like an editorial spread - large roman-numeral sections walking through the vision, the cohorts, the projects, and the resources - backed by a kit of social templates for events, announcements, and milestones that keep every post on-brand.',

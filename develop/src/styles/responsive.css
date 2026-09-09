@@ -102,3 +102,10 @@
     color: #666;
   }
 }
+
+/* The index boxes auto-fill, so they reflow on their own down to one column.
+   This only tightens the gap once a single column means each card is as wide
+   as the page. */
+@media (max-width: 46rem) {
+  .pgrid { gap: var(--gap); }
+}

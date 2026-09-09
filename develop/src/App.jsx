@@ -26,13 +26,18 @@ export default function App() {
       <ScrollProgress />
       <div className="app-root">
         <Nav />
+        {/* The frozen location comes back through the render prop: the old
+            page has to keep rendering for the length of its exit, after the
+            URL has already changed. */}
         <RouteTransition>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:slug" element={<ProjectDetail />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {(location) => (
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/projects/:slug" element={<ProjectDetail />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          )}
         </RouteTransition>
       </div>
       {/* Siblings of .app-root so `position: fixed` isn't trapped by the

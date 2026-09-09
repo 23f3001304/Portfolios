@@ -36,7 +36,7 @@ export function useOneko({ src = '/oneko/oneko-dog.gif' } = {}) {
     if (existing) existing.remove();
 
     // Append to <html>, not <body>. Body has filter/transform animations
-    // applied (page-in, route-fade) which create stacking contexts and
+    // applied (page-in, route-swap) which create stacking contexts and
     // break `position: fixed` - the cat would scroll with the page.
     // <html> stays free of those styles, so fixed positioning stays
     // viewport-relative and the cat sticks while the page scrolls.

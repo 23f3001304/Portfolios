@@ -83,8 +83,17 @@
 /* ============================================
    Page route transitions
    ============================================ */
-.route-fade {
-  animation: route-in 520ms var(--ease-out-quint);
+/* Two halves of one swap: the outgoing page lifts and blurs away, then the
+   incoming one rises into place. The exit is deliberately much shorter than
+   the entrance - it is dead time, and the entrance is what reads as the
+   change. `backwards`/`forwards` hold each end so there is no flash of an
+   un-animated frame between them. */
+.route-in {
+  animation: route-in 520ms var(--ease-out-quint) backwards;
+}
+.route-out {
+  animation: route-out 180ms var(--ease-out-quint) forwards;
+  pointer-events: none;
 }
 @keyframes route-in {
   from {
@@ -97,4 +106,14 @@
     filter: blur(0);
     transform: translate3d(0, 0, 0);
   }
+}
+@keyframes route-out {
+  to {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate3d(0, -8px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-in, .route-out { animation: none; }
 }

@@ -14,6 +14,9 @@ export const tcursor = {
   ],
   sprite: '/oneko/oneko-vaporwave.gif',
   accent: '#ef4444',
+  // The app is dark-themed, so its screenshots invert to read as a light UI
+  // in light mode - the same treatment the hero already gets.
+  invertShotsInLight: true,
   hero: {
     light: '/projects/tcursor/product-tilt-light.webp',
     dark: '/projects/tcursor/product-tilt-dark.webp',

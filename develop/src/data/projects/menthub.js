@@ -14,6 +14,10 @@ export const menthub = {
   ],
   sprite: '/oneko/oneko-tora.gif',
   accent: '#fd5555',
+  hero: {
+    light: '/projects/menthub/product-tilt-light.webp',
+    dark: '/projects/menthub/product-tilt-dark.webp',
+  },
   overview: [
     'MentHub - branded Mentor Hub in the product - is a community Q&A platform designed for M.B.M. University, Jodhpur: a student initiative where juniors ask, seniors and teachers answer, and the whole campus shares notes and events in one place. I designed it end to end in Figma, from a verified sign-up through the question feed to a resource shelf and an events board.',
     'It runs on two surfaces with two personalities. The onboarding is calm and trustworthy - royal blue on a soft scattered-square grid, one card at a time - because it asks for real identity: Aadhar and the Academic Bank of Credits ID for students, department and post for teachers. The app itself is warmer and busier, led by a coral wordmark and a coral call to action, so posting a question or an answer always reads as the obvious next move.',

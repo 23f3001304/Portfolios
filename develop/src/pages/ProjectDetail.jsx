@@ -87,7 +87,7 @@ export default function ProjectDetail() {
         <Reveal className="proj-hero">
           <img
             src={heroSrc}
-            alt={`${project.name} running in a browser window`}
+            alt={project.heroAlt ?? `${project.name} running in a browser window`}
             width={IMG_DIMS[heroSrc]?.[0]}
             height={IMG_DIMS[heroSrc]?.[1]}
             decoding="async"

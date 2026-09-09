@@ -14,6 +14,13 @@ export const animy = {
   ],
   sprite: '/oneko/oneko-vaporwave.gif',
   accent: '#8a5cff',
+  // No product shot to take - so a typographic poster instead
+  // (scripts/posters.mjs), drawn in this project's own accent.
+  hero: {
+    light: '/projects/animy/poster-light.webp',
+    dark: '/projects/animy/poster-dark.webp',
+  },
+  heroAlt: 'Poster: the word ANIMY onion-skinned behind itself, the way a render preview stacks frames',
   overview: [
     'ANIMY turns a sentence into a short animation. The prompt goes to a language model that writes Manim, the Python animation engine; the server renders that code headlessly into an mp4 and stores the result. The frontend is React - this case study is the Node tier, where one request has to survive a render that takes minutes.',
     'The spine is small: four workers drain a queue, each running the model-then-render pipeline out of band, while the browser tracks progress by polling a status endpoint. That channel was shaped by two separate constraints - WebSockets cost too much to hold open for every user, and Heroku\'s 30-second request limit ruled out any poll that waits with the connection open - so what is left is short polls that each return a quick status.',

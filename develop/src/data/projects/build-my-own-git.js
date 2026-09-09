@@ -14,6 +14,13 @@ export const buildMyOwnGit = {
   ],
   sprite: '/oneko/oneko-dog.gif',
   accent: '#10a37f',
+  // No product shot to take - so a typographic poster instead
+  // (scripts/posters.mjs), drawn in this project's own accent.
+  hero: {
+    light: '/projects/build-my-own-git/poster-light.webp',
+    dark: '/projects/build-my-own-git/poster-dark.webp',
+  },
+  heroAlt: 'Poster: the real SHA-1 of a git blob, and the .git/objects path it is stored at',
   overview: [
     'Build Your Own Git, taken at the plumbing layer: not a wrapper over the `git` binary but a re-implementation of the thing underneath it, the content-addressed object store. Every file, directory, and commit becomes an object named by the SHA-1 of its own contents and written, zlib-deflated, under `.git/objects`.',
     'It runs on Node built-ins alone - `crypto` for SHA-1, `zlib` for framing, `fs` for the store - and stays close enough to the real format that `git cat-file` reads back the blobs, trees, and commits it produces. A small command-pattern CLI sends each verb to its own class.',

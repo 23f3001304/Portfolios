@@ -12,12 +12,67 @@ const OUT = resolve('scripts/.shots/product');
 const W = 1440, H = 960, DSF = 2;
 
 const PROJECTS = {
+  'spider-man': {
+    app: true,
+    noInvert: true,
+    // A Figma concept, never deployed - so no browser bar claiming it was.
+    file: 'public/projects/spider-man/home.png',
+    chromeLight: '#f6efee',
+    light: {
+      bg: 'linear-gradient(118deg,#ffe3e0 0%,#ffbdb6 36%,#ff8f86 72%,#e2534a 100%)',
+      wash: 'radial-gradient(115% 85% at 26% 10%, rgba(255,248,247,.86) 0%, rgba(255,248,247,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#180f0f 0%,#0c0808 55%,#12090b 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(226,54,54,.26) 0%, rgba(226,54,54,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(45,86,196,.16) 0%, rgba(45,86,196,0) 60%)',
+    },
+    ring: ['#e23636', '#f4645b', '#ffb0a6', '#2d56c4'],
+    glow: 'rgba(226,54,54,.16)',
+  },
+  menthub: {
+    app: true,
+    noInvert: true,
+    // Figma work shown as designed - no chrome, no inversion.
+    file: 'public/projects/menthub/home.png',
+    shotIsLight: true,
+    chromeLight: '#f7f0f0',
+    light: {
+      bg: 'linear-gradient(118deg,#ffe7e7 0%,#ffc6c6 36%,#ff9d9d 72%,#f56b6b 100%)',
+      wash: 'radial-gradient(115% 85% at 26% 10%, rgba(255,250,250,.88) 0%, rgba(255,250,250,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#181011 0%,#0d0809 55%,#130a0c 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(253,85,85,.26) 0%, rgba(253,85,85,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(255,170,120,.16) 0%, rgba(255,170,120,0) 60%)',
+    },
+    ring: ['#fd5555', '#ff8080', '#ffc0c0', '#ffaa78'],
+    glow: 'rgba(253,85,85,.16)',
+  },
+  stic: {
+    app: true,
+    noInvert: true,
+    // A brand/landing design at 7680 wide, so the frame downsamples.
+    file: 'public/projects/stic/hero.jpg',
+    shotIsLight: true,
+    chromeLight: '#f5eeec',
+    light: {
+      bg: 'linear-gradient(118deg,#ffe8e2 0%,#ffcabd 36%,#f0a292 72%,#c0463a 100%)',
+      wash: 'radial-gradient(115% 85% at 26% 10%, rgba(255,250,248,.86) 0%, rgba(255,250,248,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#171010 0%,#0c0807 55%,#110a09 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(192,70,58,.26) 0%, rgba(192,70,58,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(233,180,76,.16) 0%, rgba(233,180,76,0) 60%)',
+    },
+    ring: ['#c0463a', '#d9705f', '#f0b3a3', '#e9b44c'],
+    glow: 'rgba(192,70,58,.16)',
+  },
   tcursor: {
-    // A desktop app, not a site - `app: true` drops the URL-bar affordances
-    // (lock, reload, tabs) so the frame reads as a window rather than a browser.
+    // A desktop app, not a site: `app` drops the whole window bar, because the
+    // screenshot already contains TCursor's own titlebar - a second one reads as
+    // a browser wrapped around something that never had a URL. `noRing` drops the
+    // conic donut, leaving only the soft blobs.
     file: 'public/projects/tcursor/editor.png',
     app: true,
-    domain: 'TCursor',
+    noRing: true,
     chromeLight: '#f4efec',
     light: {
       bg: 'linear-gradient(118deg,#ffe6e0 0%,#ffc7bd 34%,#ff9f92 70%,#f5766a 100%)',
@@ -140,31 +195,22 @@ function html(p, style, feel) {
   const shadow = dark
     ? `0 30px 70px rgba(0,0,0,.55), 0 36px 90px -18px rgba(0,0,0,.78), 0 0 150px ${p.glow}`
     : '0 30px 80px -22px rgba(56,28,10,.5), 0 90px 180px -40px rgba(56,28,10,.32)';
+  // The window deliberately runs off the right edge and sits big in the frame -
+  // the composition continues past the crop rather than posing inside it.
   const place =
     style === 'tilt'
       ? 'left:150px;top:270px;width:1720px;transform:rotate(-8deg);transform-origin:0 0;border-radius:18px;'
       : 'left:230px;top:175px;width:1330px;';
-  const [c1, c2, c3, c4] = p.ring;
-  const invertShot = p.shotIsLight ? dark : !dark;
-  const conic = `conic-gradient(from 215deg,${c1},${c2},${c3},${c4},${c1})`;
-  // `noRing` drops the conic donut and keeps only the soft blobs - the same
-  // treatment the flat/dark composition already uses.
+  const [, c2, , c4] = p.ring;
+  const invertShot = p.noInvert ? false : (p.shotIsLight ? dark : !dark);
+  // Soft blobs only. The conic donut this used to draw behind the tilt was
+  // removed by request - it read as a decorative ring nobody asked for and
+  // pulled the eye off the product. `noRing` is now the only behaviour, so
+  // entries that still set it are simply agreeing with the default.
   const blobsOnly = (screen) =>
     `<div class="blob" style="--b:70px;--o:${screen ? '.5' : '.55'};${screen ? '--m:screen;' : ''}left:-200px;top:-240px;width:680px;height:680px;background:radial-gradient(circle,${c2} 0%,transparent 62%)"></div>
      <div class="blob" style="--b:70px;--o:.5;${screen ? '--m:screen;' : ''}left:-160px;bottom:-240px;width:560px;height:560px;background:radial-gradient(circle,${c4} 0%,transparent 60%)"></div>`;
-  const rings = p.noRing
-    ? blobsOnly(dark)
-    : style !== 'flat'
-      ? dark
-        ? `<div class="ring" style="--b:22px;--o:.55;--m:screen;left:-170px;top:-190px;width:540px;height:540px;background:${conic};transform:rotate(24deg)"></div>
-           <div class="blob" style="--b:48px;--o:.55;--m:screen;left:-160px;bottom:-180px;width:480px;height:480px;background:radial-gradient(circle,${c4} 0%,transparent 60%)"></div>`
-        : `<div class="ring" style="--b:18px;--o:.8;left:-170px;top:-190px;width:540px;height:540px;background:${conic};transform:rotate(24deg)"></div>
-           <div class="blob" style="--b:48px;left:-140px;bottom:-170px;width:440px;height:440px;background:radial-gradient(circle at 40% 38%,${c2},${c4} 74%)"></div>`
-      : dark
-        ? `<div class="blob" style="--b:70px;--o:.5;--m:screen;left:-200px;top:-240px;width:680px;height:680px;background:radial-gradient(circle,${c2} 0%,transparent 62%)"></div>
-           <div class="blob" style="--b:70px;--o:.5;--m:screen;left:-160px;bottom:-240px;width:560px;height:560px;background:radial-gradient(circle,${c4} 0%,transparent 60%)"></div>`
-        : `<div class="ring" style="left:-210px;top:-230px;width:620px;height:620px;background:${conic};transform:rotate(18deg)"></div>
-           <div class="blob" style="left:-140px;bottom:-220px;width:480px;height:480px;background:radial-gradient(circle at 38% 35%,${c2},${c4} 72%)"></div>`;
+  const rings = blobsOnly(dark);
   return `<!doctype html><html><head><meta charset="utf-8"><style>
   *{margin:0;padding:0;box-sizing:border-box}
   .canvas{position:relative;width:${W}px;height:${H}px;overflow:hidden;background:${p[feel].bg}}
@@ -188,18 +234,18 @@ function html(p, style, feel) {
     <div class="wash"></div>
     ${rings}
     <div class="win">
-      <div class="bar">
+      ${p.app ? '' : `<div class="bar">
         <div class="lights"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
-        ${p.app ? '' : `<span class="ic">${ICONS.sidebar}</span>
+        <span class="ic">${ICONS.sidebar}</span>
         <span class="ic">${ICONS.back}</span>
-        <span class="ic" style="opacity:.45">${ICONS.fwd}</span>`}
+        <span class="ic" style="opacity:.45">${ICONS.fwd}</span>
         <div class="mid">
-          ${p.app ? '' : `<span class="ic">${ICONS.shield}</span>`}
-          <div class="pill">${p.app ? '' : `<span style="display:flex;opacity:.7">${ICONS.lock}</span>`}${p.domain}${p.app ? '' : `<span class="re">${ICONS.reload}</span>`}</div>
+          <span class="ic">${ICONS.shield}</span>
+          <div class="pill"><span style="display:flex;opacity:.7">${ICONS.lock}</span>${p.domain}<span class="re">${ICONS.reload}</span></div>
         </div>
-        ${p.app ? '' : `<span class="ic">${ICONS.plus}</span>
-        <span class="ic">${ICONS.grid}</span>`}
-      </div>
+        <span class="ic">${ICONS.plus}</span>
+        <span class="ic">${ICONS.grid}</span>
+      </div>`}
       <img class="shot" src="${pathToFileURL(resolve(!dark && p.fileLight ? p.fileLight : p.file)).href}">
     </div>
     <div class="noise"></div>

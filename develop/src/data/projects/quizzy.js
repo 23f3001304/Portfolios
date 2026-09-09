@@ -14,6 +14,13 @@ export const quizzy = {
   ],
   sprite: '/oneko/oneko-tora.gif',
   accent: '#ff5e00',
+  // No product shot to take - so a typographic poster instead
+  // (scripts/posters.mjs), drawn in this project's own accent.
+  hero: {
+    light: '/projects/quizzy/poster-light.webp',
+    dark: '/projects/quizzy/poster-dark.webp',
+  },
+  heroAlt: 'Poster: a four-option answer sheet where "all of the above" is the marked answer',
   overview: [
     'Quizzy is the answer side of a quiz: point it at a starting URL and it solves question after question on its own. A FastAPI service takes the URL, spawns a background task, and runs a two-agent loop - a fast Gemini Flash agent sketches a strategy, then a Gemini Pro agent solves with tools and returns a typed answer that gets submitted automatically.',
     'Most of the work is the harness around the model: 90 tools across twelve modules (web, data, documents, media, math), a subprocess sandbox that runs Python the agent writes on the fly, and a self-correcting loop that feeds each rejection back into the next attempt. Everything that crosses a layer is a Pydantic contract, and the whole thing containerises into one image.',
