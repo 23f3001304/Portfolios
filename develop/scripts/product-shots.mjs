@@ -17,6 +17,7 @@ const PROJECTS = {
     // chrome carries the local origin the README actually tells you to open.
     file: 'public/projects/saathi/chat.png',
     shotIsLight: true,
+    noRing: true,
     domain: 'localhost:5173',
     chromeLight: '#f5f1e9',
     light: {
@@ -126,9 +127,16 @@ function html(p, style, feel) {
       ? 'left:150px;top:270px;width:1720px;transform:rotate(-8deg);transform-origin:0 0;border-radius:18px;'
       : 'left:230px;top:175px;width:1330px;';
   const [c1, c2, c3, c4] = p.ring;
+  const invertShot = p.shotIsLight ? dark : !dark;
   const conic = `conic-gradient(from 215deg,${c1},${c2},${c3},${c4},${c1})`;
-  const rings =
-    style !== 'flat'
+  // `noRing` drops the conic donut and keeps only the soft blobs - the same
+  // treatment the flat/dark composition already uses.
+  const blobsOnly = (screen) =>
+    `<div class="blob" style="--b:70px;--o:${screen ? '.5' : '.55'};${screen ? '--m:screen;' : ''}left:-200px;top:-240px;width:680px;height:680px;background:radial-gradient(circle,${c2} 0%,transparent 62%)"></div>
+     <div class="blob" style="--b:70px;--o:.5;${screen ? '--m:screen;' : ''}left:-160px;bottom:-240px;width:560px;height:560px;background:radial-gradient(circle,${c4} 0%,transparent 60%)"></div>`;
+  const rings = p.noRing
+    ? blobsOnly(dark)
+    : style !== 'flat'
       ? dark
         ? `<div class="ring" style="--b:22px;--o:.55;--m:screen;left:-170px;top:-190px;width:540px;height:540px;background:${conic};transform:rotate(24deg)"></div>
            <div class="blob" style="--b:48px;--o:.55;--m:screen;left:-160px;bottom:-180px;width:480px;height:480px;background:radial-gradient(circle,${c4} 0%,transparent 60%)"></div>`
@@ -154,10 +162,10 @@ function html(p, style, feel) {
   .mid{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;min-width:0}
   .pill{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:430px;height:34px;border-radius:9px;background:${pillBg};color:${txt};font:14px/1 'Cascadia Code',Consolas,monospace;letter-spacing:.2px}
   .pill .re{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:${icon};display:flex}
-  /* The light feel fakes a light UI by inverting a dark-themed app shot.
-     Apps that are already light (shotIsLight) must opt out, or the light
-     composition ends up darker than the dark one. */
-  .shot{display:block;width:100%;${dark || p.shotIsLight ? '' : 'filter:invert(1) hue-rotate(180deg);'}}
+  /* Inverting the shot fakes the opposite feel. Dark-themed apps get it in
+     the light composition; a light-themed app (shotIsLight) gets it in the
+     dark one, so each feel reads the way its backdrop does. */
+  .shot{display:block;width:100%;${invertShot ? 'filter:invert(1) hue-rotate(180deg);' : ''}}
   </style></head><body><div class="canvas">
     <div class="wash"></div>
     ${rings}
