@@ -63,6 +63,13 @@ export const IMG_DIMS = {
   '/projects/typereal/themes-editor.png': [2880, 1800],
   '/projects/typereal/tutorial.png': [2880, 1800],
   /* Product-shot heroes (scripts/product-shots.mjs) - flat & tilt, per theme feel. */
+  '/projects/tcursor/editor.png': [1440, 900],
+  '/projects/tcursor/zoom.png': [1440, 900],
+  '/projects/tcursor/layout.png': [1440, 900],
+  '/projects/tcursor/product-flat-light.webp': [2400, 1600],
+  '/projects/tcursor/product-flat-dark.webp': [2400, 1600],
+  '/projects/tcursor/product-tilt-light.webp': [2400, 1600],
+  '/projects/tcursor/product-tilt-dark.webp': [2400, 1600],
   '/projects/saathi/product-flat-light.webp': [2400, 1600],
   '/projects/saathi/product-flat-dark.webp': [2400, 1600],
   '/projects/saathi/product-tilt-light.webp': [2400, 1600],

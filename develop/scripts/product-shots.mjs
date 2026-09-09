@@ -12,6 +12,24 @@ const OUT = resolve('scripts/.shots/product');
 const W = 1440, H = 960, DSF = 2;
 
 const PROJECTS = {
+  tcursor: {
+    // A desktop app, not a site - `app: true` drops the URL-bar affordances
+    // (lock, reload, tabs) so the frame reads as a window rather than a browser.
+    file: 'public/projects/tcursor/editor.png',
+    app: true,
+    domain: 'TCursor',
+    chromeLight: '#f4efec',
+    light: {
+      bg: 'linear-gradient(118deg,#ffe6e0 0%,#ffc7bd 34%,#ff9f92 70%,#f5766a 100%)',
+      wash: 'radial-gradient(115% 85% at 26% 10%, rgba(255,250,248,.86) 0%, rgba(255,250,248,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#17100f 0%,#0d0a0a 55%,#120b0d 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(239,68,68,.26) 0%, rgba(239,68,68,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(139,92,246,.16) 0%, rgba(139,92,246,0) 60%)',
+    },
+    ring: ['#ef4444', '#f97362', '#ffb4a2', '#8b5cf6'],
+    glow: 'rgba(239,68,68,.16)',
+  },
   saathi: {
     // The chat landing. Saathi is not deployed - it is a stack you run - so the
     // chrome carries the local origin the README actually tells you to open.
@@ -172,15 +190,15 @@ function html(p, style, feel) {
     <div class="win">
       <div class="bar">
         <div class="lights"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
-        <span class="ic">${ICONS.sidebar}</span>
+        ${p.app ? '' : `<span class="ic">${ICONS.sidebar}</span>
         <span class="ic">${ICONS.back}</span>
-        <span class="ic" style="opacity:.45">${ICONS.fwd}</span>
+        <span class="ic" style="opacity:.45">${ICONS.fwd}</span>`}
         <div class="mid">
-          <span class="ic">${ICONS.shield}</span>
-          <div class="pill"><span style="display:flex;opacity:.7">${ICONS.lock}</span>${p.domain}<span class="re">${ICONS.reload}</span></div>
+          ${p.app ? '' : `<span class="ic">${ICONS.shield}</span>`}
+          <div class="pill">${p.app ? '' : `<span style="display:flex;opacity:.7">${ICONS.lock}</span>`}${p.domain}${p.app ? '' : `<span class="re">${ICONS.reload}</span>`}</div>
         </div>
-        <span class="ic">${ICONS.plus}</span>
-        <span class="ic">${ICONS.grid}</span>
+        ${p.app ? '' : `<span class="ic">${ICONS.plus}</span>
+        <span class="ic">${ICONS.grid}</span>`}
       </div>
       <img class="shot" src="${pathToFileURL(resolve(!dark && p.fileLight ? p.fileLight : p.file)).href}">
     </div>
