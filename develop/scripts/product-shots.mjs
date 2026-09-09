@@ -12,6 +12,24 @@ const OUT = resolve('scripts/.shots/product');
 const W = 1440, H = 960, DSF = 2;
 
 const PROJECTS = {
+  saathi: {
+    // The chat landing. Saathi is not deployed - it is a stack you run - so the
+    // chrome carries the local origin the README actually tells you to open.
+    file: 'public/projects/saathi/chat.png',
+    shotIsLight: true,
+    domain: 'localhost:5173',
+    chromeLight: '#f5f1e9',
+    light: {
+      bg: 'linear-gradient(118deg,#e4f4f4 0%,#bae4e7 32%,#84d0d6 68%,#52bcc4 100%)',
+      wash: 'radial-gradient(100% 75% at 28% 8%, rgba(251,250,246,.74) 0%, rgba(251,250,246,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#0f1617 0%,#0a0e0f 55%,#081113 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(16,152,173,.25) 0%, rgba(16,152,173,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(232,131,58,.15) 0%, rgba(232,131,58,0) 60%)',
+    },
+    ring: ['#0b7285', '#1098ad', '#63e6be', '#e8833a'],
+    glow: 'rgba(16,152,173,.16)',
+  },
   typereal: {
     // The stats dashboard, both feels - the themes editor pairs hex labels
     // with swatches, which the light-feel inversion would falsify.
@@ -136,7 +154,10 @@ function html(p, style, feel) {
   .mid{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;min-width:0}
   .pill{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:430px;height:34px;border-radius:9px;background:${pillBg};color:${txt};font:14px/1 'Cascadia Code',Consolas,monospace;letter-spacing:.2px}
   .pill .re{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:${icon};display:flex}
-  .shot{display:block;width:100%;${dark ? '' : 'filter:invert(1) hue-rotate(180deg);'}}
+  /* The light feel fakes a light UI by inverting a dark-themed app shot.
+     Apps that are already light (shotIsLight) must opt out, or the light
+     composition ends up darker than the dark one. */
+  .shot{display:block;width:100%;${dark || p.shotIsLight ? '' : 'filter:invert(1) hue-rotate(180deg);'}}
   </style></head><body><div class="canvas">
     <div class="wash"></div>
     ${rings}

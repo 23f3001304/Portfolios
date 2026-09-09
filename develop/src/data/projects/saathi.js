@@ -14,6 +14,10 @@ export const saathi = {
   ],
   sprite: '/oneko/oneko-maia.gif',
   accent: '#1098ad',
+  hero: {
+    light: '/projects/saathi/product-tilt-light.webp',
+    dark: '/projects/saathi/product-tilt-dark.webp',
+  },
   overview: [
     'Saathi is an agent that shops on your behalf and cannot spend your money outside a mandate you signed. You say "a navy kurta under ₹2,000, refundable", and it drafts an Intent Mandate - a ceiling, a category, a refundability requirement, an expiry - which you sign by holding a button for 600 ms. Nothing has been searched for yet. Only after that does it go looking.',
     'Every rupee moves under an AP2 mandate chain, Intent → Cart → Payment, issued as W3C Verifiable Credentials and appended to a hash-chained ledger. The thesis fits in one sentence: the model decides what to do, the covenant decides what is allowed, and neither can quietly become the other. It is a pnpm and TypeScript monorepo whose dependency rules are compiled rather than documented - the agent layer has no import path to a payment rail even by accident.',
