@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const items = [
   { to: '/',                          label: 'index',    match: (p) => p === '/' },
-  { to: '/projects/typereal',         label: 'projects', match: (p) => p.startsWith('/projects') },
+  { to: '/projects',                  label: 'projects', match: (p) => p.startsWith('/projects') },
 ];
 
 const externals = [

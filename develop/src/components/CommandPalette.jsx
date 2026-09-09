@@ -31,7 +31,7 @@ const baseCommands = [
   { id: 'home',         icon: <IconHome />,       label: 'Go to index',    hint: 'Home',       to: '/' },
   { id: 'about',        icon: <IconAbout />,      label: 'About',          hint: 'Home · 01',  to: '/#about',          anchor: 'about' },
   { id: 'experience',   icon: <IconExperience />, label: 'Experience',     hint: 'Home · 02',  to: '/#experience',     anchor: 'experience' },
-  { id: 'projects',     icon: <IconProjects />,   label: 'All projects',   hint: 'Home · 03',  to: '/#projects',       anchor: 'projects' },
+  { id: 'projects',     icon: <IconProjects />,   label: 'All projects',   hint: 'Index',      to: '/projects' },
   { id: 'skills',       icon: <IconSkills />,     label: 'Skills',         hint: 'Home · 04',  to: '/#skills',         anchor: 'skills' },
   { id: 'education',    icon: <IconEducation />,  label: 'Education',      hint: 'Home · 05',  to: '/#education',      anchor: 'education' },
   { id: 'certs',        icon: <IconCerts />,      label: 'Certifications', hint: 'Home · 06',  to: '/#certifications', anchor: 'certifications' },
