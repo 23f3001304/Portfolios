@@ -10,6 +10,8 @@ import { StoryButton } from './components/StoryButton.jsx';
 import { StoryMode } from './components/StoryMode.jsx';
 import { WorldButton } from './components/WorldButton.jsx';
 import { WorldMode } from './components/WorldMode.jsx';
+import { SpaceButton } from './components/SpaceButton.jsx';
+import { SpaceMode } from './components/SpaceMode.jsx';
 import { LightboxProvider } from './components/LightboxProvider.jsx';
 import { useThemeShortcut } from './useThemeShortcut.js';
 import { useLenis } from './useLenis.js';
@@ -54,6 +56,7 @@ export default function App() {
         <StoryButton />
         <div id="toc-slot" className="ft-toc-slot" />
         <WorldButton />
+        <SpaceButton />
       </div>
       <div className="floating-toolbar floating-toolbar--right">
         <ThemeToggle />
@@ -61,6 +64,7 @@ export default function App() {
       <Mode3D />
       <StoryMode />
       <WorldMode />
+      <SpaceMode />
     </LightboxProvider>
   );
 }

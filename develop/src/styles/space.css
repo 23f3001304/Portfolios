@@ -1,0 +1,338 @@
+/* ============================================================
+   The project space - the helix. A full-viewport WebGL layer
+   with the page folded away behind it (same fold as the
+   studio), HTML labels projected into the scene each frame,
+   a quiet instrument HUD, and the crawl: a project's story
+   set on a receding plane, its figures alongside. Toggled by
+   `mode-space` on <html> (useSpaceMode.js).
+   ============================================================ */
+.mode-space .app-root {
+  transform: perspective(1400px) rotateX(-74deg) scale(0.86);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+}
+.mode-space { overflow-x: hidden; }
+.mode-space .scroll-progress { display: none; }
+.mode-space .floating-toolbar {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  pointer-events: none;
+}
+.mode-space #oneko,
+.mode-space #oneko-bubble { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .mode-space .app-root { transform: none; filter: none; }
+}
+
+.space-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 700ms var(--ease-out-quint);
+}
+.space-overlay[data-open="true"] { opacity: 1; pointer-events: auto; }
+
+.space { position: absolute; inset: 0; }
+.space-canvas {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 500ms var(--ease-out-quint), opacity 500ms var(--ease-out-quint);
+}
+.space-canvas.is-grabbing { cursor: grabbing; }
+.space-canvas.has-hover { cursor: pointer; }
+.space-canvas canvas { display: block; }
+.space.is-reading .space-canvas { filter: blur(8px); opacity: 0.35; }
+.space.is-reading .space-labels,
+.space.is-reading .space-focus,
+.space.is-reading .space-exit,
+.space.is-reading .space-hud { opacity: 0 !important; pointer-events: none !important; }
+
+/* ---- Labels projected from 3D. Real text, always sharp. ---- */
+.space-labels { position: absolute; inset: 0; pointer-events: none; transition: opacity 300ms; }
+.space-label {
+  position: absolute;
+  left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+  color: var(--fg);
+}
+.space-label .id {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.space-label .name { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.015em; }
+.space-label .when { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray); }
+.space-label[data-focus="true"] .name { font-size: 1.35rem; }
+.space-year {
+  position: absolute;
+  left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--gray);
+  opacity: 0.7;
+}
+
+/* The focused plate's readout: tagline and the four metrics beneath it. */
+.space-focus {
+  position: absolute;
+  left: 0; top: 0;
+  transform: translate(-50%, 0);
+  width: min(34rem, 82vw);
+  padding-top: 0.9rem;
+  color: var(--fg);
+  opacity: 0;
+  transition: opacity 320ms var(--ease-out-quint);
+  pointer-events: none;
+}
+.space-focus[data-show="true"] { opacity: 1; pointer-events: auto; }
+.space-focus .tagline { font-size: 0.95rem; line-height: 1.5; color: var(--gray); }
+.space-focus .metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap);
+  margin-top: var(--gap);
+}
+.space-focus .metric b {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.space-focus .metric b small { font-size: 0.7em; color: var(--gray); font-weight: 500; }
+.space-focus .metric span {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+.space-focus .open {
+  margin-top: var(--gap);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.space-focus .open:hover { text-decoration: underline; }
+
+/* ---- Instruments ---- */
+.space-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+  transition: opacity 300ms;
+}
+.space-hud .kicker {
+  position: absolute;
+  top: var(--gap);
+  left: 50%;
+  transform: translateX(-50%);
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+}
+.space-hud .readout { position: absolute; left: var(--gap-double); bottom: var(--gap-double); }
+.space-hud .readout b { color: var(--fg); font-weight: 500; }
+.space-hud .index { position: absolute; right: var(--gap-double); bottom: var(--gap-double); }
+.space-hud .hint { position: absolute; right: var(--gap-double); top: var(--gap); text-align: right; line-height: 1.8; opacity: 0.8; }
+.space-hud .hint kbd {
+  font: inherit;
+  padding: 1px 5px;
+  border: 1px solid var(--btn-border);
+  border-radius: var(--tight-radius);
+  color: var(--fg);
+}
+.space-hud .scrubber {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--gap-double) + 2px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+.space-hud .scrubber button {
+  width: 8px; height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: var(--light-gray);
+  cursor: pointer;
+  transition: background-color 200ms, transform 200ms;
+}
+.space-hud .scrubber button:hover { background: var(--gray); }
+.space-hud .scrubber button[aria-current="true"] { background: var(--accent); transform: scale(1.35); }
+.space-exit { position: absolute; top: var(--gap); left: var(--gap); z-index: 5; }
+
+/* ---- The crawl ---- */
+.crawl {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  color: var(--fg);
+  animation: crawl-in 500ms var(--ease-out-quint) both;
+}
+@keyframes crawl-in { from { opacity: 0; } to { opacity: 1; } }
+.crawl-stage {
+  position: absolute;
+  inset: 0;
+  perspective: 1300px;
+  perspective-origin: 50% 90%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+}
+/* The plane is hinged near the bottom of the screen: text enters from below,
+   large and close, and recedes as it climbs. Tilted just enough to recede,
+   never enough to squash the type. */
+.crawl-plane {
+  position: absolute;
+  left: 50%;
+  top: 84%;
+  width: min(54rem, 84vw);
+  transform: translateX(-50%) rotateX(26deg);
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+}
+.crawl-column {
+  will-change: transform;
+  font-size: 1.55rem;
+  line-height: 1.55;
+  padding-bottom: 45vh;
+}
+.crawl-column .kicker {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+}
+.crawl-column h2 { font-size: 3.4rem; letter-spacing: -0.035em; line-height: 1; margin-bottom: 1.2rem; }
+.crawl-column .tagline { color: var(--gray); margin-bottom: 2rem; }
+.crawl-column p { margin-bottom: 1.4rem; }
+.crawl-column h3 { font-size: 2rem; letter-spacing: -0.025em; margin: 2.6rem 0 0.9rem; }
+.crawl-column .end {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  color: var(--gray);
+  margin-top: 3rem;
+  text-align: center;
+}
+
+/* A figure set into the story beside its section, turned a little toward you. */
+.crawl-fig {
+  display: block;
+  width: 78%;
+  margin: 0.6rem 0 2.2rem auto;
+  padding: 0;
+  border: 1px solid var(--btn-border);
+  border-radius: var(--inline-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transform: rotateY(-9deg);
+  transform-origin: 100% 50%;
+  transition: border-color 200ms, transform 300ms var(--ease-out-quint);
+}
+.crawl-fig:hover { border-color: var(--accent); transform: rotateY(-4deg); }
+.crawl-fig img { display: block; width: 100%; height: auto; }
+.crawl-fig .cap,
+.crawl-front .cap {
+  display: block;
+  margin: 0;
+  padding: 7px 11px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+  background: var(--lightest-gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The face-on copy that flies from a figure to the centre and back. */
+.crawl-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  animation: crawl-in 400ms var(--ease-out-quint) both;
+}
+.crawl-front {
+  position: fixed;
+  z-index: 10;
+  margin: 0;
+  border: 1px solid var(--accent);
+  border-radius: var(--inline-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  cursor: zoom-out;
+  transition:
+    left 640ms var(--ease-out-quint), top 640ms var(--ease-out-quint),
+    width 640ms var(--ease-out-quint), height 640ms var(--ease-out-quint),
+    opacity 300ms;
+}
+.crawl-front[data-back="true"] { opacity: 0; transition-delay: 0s, 0s, 0s, 0s, 340ms; }
+.crawl-front img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.crawl-front .cap { position: absolute; left: 0; right: 0; bottom: 0; }
+
+.crawl-hud {
+  position: absolute;
+  left: var(--gap);
+  right: var(--gap);
+  bottom: var(--gap);
+  z-index: 12;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--gap);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+}
+.crawl-hud .btn { font-family: var(--font-mono); letter-spacing: 0.08em; }
+
+@media (max-width: 767px) {
+  .space-focus .metrics { grid-template-columns: repeat(2, 1fr); }
+  .space-hud .hint { display: none; }
+  .crawl-plane { transform: translateX(-50%) rotateX(16deg); }
+  .crawl-column { font-size: 1.15rem; }
+  .crawl-column h2 { font-size: 2.3rem; }
+  .crawl-fig { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crawl { animation: none; }
+  .crawl-front { transition: none; }
+}
