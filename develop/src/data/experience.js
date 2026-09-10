@@ -5,8 +5,8 @@ export const experience = [
     place: 'Jodhpur, IN',
     when: 'May → Jul 2025',
     bullets: [
-      'Trained an image-to-image translation model (CycleGAN) for 50 epochs per experiment on 1,000+ paired & unpaired images using CUDA-accelerated GPU training.',
-      'Evaluated outputs through qualitative comparisons every 5 epochs and tuned training parameters against observed artefacts and performance trends.',
+      'Trained AI image models (CycleGAN) in Python and PyTorch on 1,000+ images using a GPU, teaching the computer to redraw a photo in a different style.',
+      'Tested and fine-tuned the models to produce clearer, sharper images, useful for tasks like brightening dark, low-light photos.',
     ],
   },
 ];

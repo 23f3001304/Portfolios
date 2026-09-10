@@ -4,7 +4,7 @@ import { useOneko } from '../useOneko.js';
 import { useDocumentTitle } from '../useDocumentTitle.js';
 import { Reveal } from '../components/Reveal.jsx';
 import {
-  profile, intro, experience, projects, skills, education, certifications,
+  profile, intro, experience, projects, skills, education, leadership, certifications,
 } from '../data.js';
 
 function Section({ id, label, children }) {
@@ -129,6 +129,17 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </Section>
+
+        <Section id="leadership" label="Leadership">
+          <div className="certs">
+            {leadership.map((l, i) => (
+              <Reveal className="cert" key={l.role} style={{ '--i': i }}>
+                <span><b>{l.role}</b>, {l.note}</span>
+                <span className="when">{l.when}</span>
+              </Reveal>
+            ))}
+          </div>
         </Section>
 
         <Section id="certifications" label="Certifications">

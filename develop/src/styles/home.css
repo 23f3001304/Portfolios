@@ -220,6 +220,7 @@
 .certs { display: flex; flex-direction: column; gap: var(--gap-half); }
 .cert { display: flex; justify-content: space-between; gap: var(--gap); font-size: 0.92rem; }
 .cert .when { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray); }
+.cert b { font-weight: 500; }
 
 /* ============================================
    Footer

@@ -20,6 +20,9 @@ const IconSkills = () => (
 const IconEducation = () => (
   <svg {...S}><path d="M12 4 2.5 9 12 14l9.5-5L12 4Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M6 11v4.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
 );
+const IconLeadership = () => (
+  <svg {...S}><circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.7" /><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M16 5.5a2.6 2.6 0 1 1 0 5.2M17.5 14c2.2.5 3.5 2.1 3.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+);
 const IconCerts = () => (
   <svg {...S}><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="M9 13.5 8 21l4-2.2L16 21l-1-7.5" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>
 );
@@ -34,7 +37,8 @@ const baseCommands = [
   { id: 'projects',     icon: <IconProjects />,   label: 'All projects',   hint: 'Index',      to: '/projects' },
   { id: 'skills',       icon: <IconSkills />,     label: 'Skills',         hint: 'Home · 04',  to: '/#skills',         anchor: 'skills' },
   { id: 'education',    icon: <IconEducation />,  label: 'Education',      hint: 'Home · 05',  to: '/#education',      anchor: 'education' },
-  { id: 'certs',        icon: <IconCerts />,      label: 'Certifications', hint: 'Home · 06',  to: '/#certifications', anchor: 'certifications' },
+  { id: 'leadership',   icon: <IconLeadership />, label: 'Leadership',     hint: 'Home · 06',  to: '/#leadership',     anchor: 'leadership' },
+  { id: 'certs',        icon: <IconCerts />,      label: 'Certifications', hint: 'Home · 07',  to: '/#certifications', anchor: 'certifications' },
 ];
 
 const externalCommands = [

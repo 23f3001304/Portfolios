@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
-  <rect x="9" y="9" width="14" height="14" rx="2.5" fill="#ff5e00"/>
+  <style>
+    .ink { fill: #0a0a0a; }
+    @media (prefers-color-scheme: dark) { .ink { fill: #f5f6f8; } }
+  </style>
+  <rect x="5"  y="4"    width="6"  height="24" rx="1.5" class="ink"/>
+  <rect x="21" y="4"    width="6"  height="24" rx="1.5" class="ink"/>
+  <rect x="5"  y="13.5" width="22" height="5"  rx="1.5" fill="#ff5e00"/>
 </svg>
