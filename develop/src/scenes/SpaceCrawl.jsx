@@ -1,29 +1,38 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useLightbox } from '../components/LightboxProvider.jsx';
 
 /* ============================================================
    The crawl. A project's story - tagline, overview, every
    section, the conclusion - set on a plane tilted away from
    you and scrolling slowly into the distance, its figures set
    into the story beside the sections they illustrate. Click a
-   figure and it comes straight to the camera, face-on; click
-   again and it goes back. Wheel or drag scrubs; auto-advance
-   pauses when you do.
+   figure and it opens in the site's gallery, face-on, with
+   prev/next through the project's figures. Wheel or drag
+   scrubs; auto-advance pauses when you do.
    ============================================================ */
 const SPEED = 34;         // px per second of auto-advance
 const PAUSE_MS = 2600;    // after a scrub, before auto-advance resumes
-const FLY_MS = 640;
 
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const galleryOpen = () => !!document.querySelector('.lightbox');
 
 export default function SpaceCrawl({ item, onClose, onOpenPage }) {
   const p = item.project;
   const colRef = useRef(null);
-  const figRefs = useRef({});
-  const [front, setFront] = useState(null); // { src, alt, cap, from: rect, to: rect, back: bool }
-  const frontRef = useRef(null);
-  frontRef.current = front;
   const pos = useRef(0);
   const pausedUntil = useRef(0);
+  const lb = useLightbox();
+  const register = lb?.register;
+  const figures = (p.sections || [])
+    .map((s, i) => (s.figure ? { ...s.figure, key: `space:${p.slug}:${i}` } : null))
+    .filter(Boolean);
+
+  // The project's figures join the page-wide gallery while the crawl is up.
+  useEffect(() => {
+    if (!register) return undefined;
+    const offs = figures.map((f) => register({ id: f.key, src: f.src, alt: f.alt || f.caption, caption: f.caption, label: f.id }));
+    return () => offs.forEach((off) => off());
+  }, [register, p.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-advance and scrubbing.
   useEffect(() => {
@@ -35,22 +44,22 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
       raf = requestAnimationFrame(frame);
       const dt = Math.min(0.05, (now - (last || now)) / 1000);
       last = now;
-      if (!rm && frontRef.current == null && now > pausedUntil.current) {
+      if (!rm && !galleryOpen() && now > pausedUntil.current) {
         pos.current = Math.min(max(), pos.current + SPEED * dt);
       }
       if (colRef.current) colRef.current.style.transform = `translate3d(0, ${(-pos.current).toFixed(1)}px, 0)`;
     }
     raf = requestAnimationFrame(frame);
     const onWheel = (e) => {
-      if (frontRef.current != null) return;
+      if (galleryOpen()) return;
       e.preventDefault();
       pos.current = Math.max(0, Math.min(max(), pos.current + e.deltaY));
       pausedUntil.current = performance.now() + PAUSE_MS;
     };
     let drag = null;
-    const onDown = (e) => { if (e.target.closest('button')) return; drag = e.clientY; };
+    const onDown = (e) => { if (e.target.closest('button') || galleryOpen()) return; drag = e.clientY; };
     const onMove = (e) => {
-      if (drag == null || frontRef.current != null) return;
+      if (drag == null) return;
       pos.current = Math.max(0, Math.min(max(), pos.current - (e.clientY - drag) * 1.6));
       drag = e.clientY;
       pausedUntil.current = performance.now() + PAUSE_MS;
@@ -69,32 +78,8 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
     };
   }, []);
 
-  // A figure comes straight: a face-on copy starts exactly over the tilted
-  // one and flies to the centre of the screen; on the way back it flies to
-  // wherever the original is now and disappears into it.
-  function bring(f, key, e) {
-    e.stopPropagation();
-    if (front) return;
-    const r = figRefs.current[key].getBoundingClientRect();
-    const from = { left: r.left, top: r.top, width: r.width, height: r.height };
-    const ratio = f.w && f.h ? f.w / f.h : r.width / r.height;
-    let width = window.innerWidth * 0.82, height = width / ratio;
-    if (height > window.innerHeight * 0.82) { height = window.innerHeight * 0.82; width = height * ratio; }
-    const to = { left: (window.innerWidth - width) / 2, top: (window.innerHeight - height) / 2, width, height };
-    setFront({ ...f, key, from, to, at: from });
-    requestAnimationFrame(() => requestAnimationFrame(() => setFront((s) => (s ? { ...s, at: s.to } : s))));
-  }
-  function sendBack() {
-    const s = frontRef.current;
-    if (!s || s.back) return;
-    const r = figRefs.current[s.key]?.getBoundingClientRect();
-    const at = r ? { left: r.left, top: r.top, width: r.width, height: r.height } : s.from;
-    setFront({ ...s, at, back: true });
-    setTimeout(() => setFront(null), reduced() ? 0 : FLY_MS);
-  }
-
   return (
-    <div className={`crawl${front ? ' has-front' : ''}`}>
+    <div className="crawl">
       <div className="crawl-stage">
         <div className="crawl-plane">
           <div className="crawl-column" ref={colRef}>
@@ -110,9 +95,8 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
                   <button
                     type="button"
                     className="crawl-fig"
-                    ref={(el) => { figRefs.current[i] = el; }}
-                    onClick={(e) => bring(s.figure, i, e)}
-                    aria-label={`Bring forward: ${s.figure.caption}`}
+                    onClick={(e) => { e.stopPropagation(); lb?.open(`space:${p.slug}:${i}`); }}
+                    aria-label={`Open in the gallery: ${s.figure.caption}`}
                   >
                     <img src={s.figure.src} alt={s.figure.alt} loading="lazy" />
                     <span className="cap">{s.figure.id} · {s.figure.caption}</span>
@@ -126,24 +110,9 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
         </div>
       </div>
 
-      {front && (
-        <>
-          <div className="crawl-backdrop" onClick={sendBack} aria-hidden="true" />
-          <figure
-            className="crawl-front"
-            style={{ left: front.at.left, top: front.at.top, width: front.at.width, height: front.at.height }}
-            onClick={sendBack}
-            data-back={!!front.back}
-          >
-            <img src={front.src} alt={front.alt} />
-            <figcaption className="cap">{front.id} · {front.caption}</figcaption>
-          </figure>
-        </>
-      )}
-
       <div className="crawl-hud">
         <button type="button" className="btn" onClick={onClose}><span aria-hidden="true">←</span> helix <span className="kbd">ESC</span></button>
-        <span>{front ? 'click anywhere to send it back' : 'scroll to read · click a figure to bring it forward'}</span>
+        <span>scroll to read · click a figure to open it</span>
         <button type="button" className="btn" onClick={onOpenPage}>open full page <span aria-hidden="true">↗</span></button>
       </div>
     </div>

@@ -19,8 +19,8 @@ import SpaceCrawl from './SpaceCrawl.jsx';
    ============================================================ */
 const NOW = { y: 2026, m: 9 };
 const PLATE_W = 3, PLATE_H = 2;
-const CAM_R = 0.38;      // camera path radius, as a share of the helix radius
-const CAM_UP = 0.7;      // camera height above the plate it looks at
+const CAM_R = 0.3;       // camera path radius, as a share of the helix radius
+const CAM_UP = 0.55;     // camera height above the plate it looks at
 const FLIGHT_MS = 1600;  // entry flight from the overview to the path
 const EXIT_MS = 900;
 const BANK = 0.12;       // radians of roll per unit of travel speed
@@ -140,10 +140,14 @@ function buildScene(host, theme) {
   const overview = { pos: new THREE.Vector3(R * 1.1, yMid + 6, R * 3.3), look: new THREE.Vector3(0, yMid, 0) };
   const pathPose = (idx, out) => {
     const t = indexToTime(layout, idx);
-    const cp = helixPoint(t, R * CAM_R, pitch, tMin);
+    // A portrait screen has a narrow horizontal field of view, so the camera
+    // stands further back from the plate the narrower the screen gets.
+    const back = Math.max(1, Math.min(2.6, 1.25 / camera.aspect));
+    const d = R * (1 - CAM_R) * back;
+    const cp = helixPoint(t, R - d, pitch, tMin);
     const lp = helixPoint(t, R, pitch, tMin);
-    out.pos.set(cp.x, cp.y + CAM_UP, cp.z);
-    out.look.set(lp.x, lp.y + 0.1, lp.z);
+    out.pos.set(cp.x, cp.y + CAM_UP * back, cp.z);
+    out.look.set(lp.x, lp.y - 0.35, lp.z); // plate sits high, readout fits below
     return out;
   };
 
@@ -329,10 +333,12 @@ export default function SpaceStage({ open }) {
       state.mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
       state.mouse.y = ((e.clientY - r.top) / r.height) * 2 - 1;
       if (state.drag) {
+        // Drag sideways or up-and-down (a phone swipe) to travel.
         const dx = e.clientX - state.drag.x;
-        state.drag.x = e.clientX;
-        state.drag.moved += Math.abs(dx);
-        nudge(-dx * 0.01);
+        const dy = e.clientY - state.drag.y;
+        state.drag.x = e.clientX; state.drag.y = e.clientY;
+        state.drag.moved += Math.abs(dx) + Math.abs(dy);
+        nudge(-(dx + dy) * 0.01);
         return;
       }
       const h = hitPlate(e);
@@ -340,7 +346,7 @@ export default function SpaceStage({ open }) {
       setHover(h);
       el.classList.toggle('has-hover', h != null);
     };
-    const onDown = (e) => { if (readingRef.current) return; state.drag = { x: e.clientX, moved: 0 }; el.classList.add('is-grabbing'); };
+    const onDown = (e) => { if (readingRef.current) return; state.drag = { x: e.clientX, y: e.clientY, moved: 0 }; el.classList.add('is-grabbing'); };
     const onUp = (e) => {
       el.classList.remove('is-grabbing');
       const d = state.drag; state.drag = null;
@@ -359,6 +365,7 @@ export default function SpaceStage({ open }) {
       if (!overviewRef.current) state.flight = 0;
     };
     const onKey = (e) => {
+      if (document.querySelector('.lightbox')) return; // the gallery owns the keys
       if (readingRef.current) {
         if (e.key === 'Escape') { readingRef.current = null; setReading(null); }
         return;

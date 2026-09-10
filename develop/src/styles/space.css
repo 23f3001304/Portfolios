@@ -94,8 +94,13 @@
   position: absolute;
   left: 0; top: 0;
   transform: translate(-50%, 0);
-  width: min(34rem, 82vw);
-  padding-top: 0.9rem;
+  width: min(36rem, 84vw);
+  margin-top: 0.8rem;
+  padding: 0.9rem 1.1rem 1rem;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--fg);
   opacity: 0;
   transition: opacity 320ms var(--ease-out-quint);
@@ -117,9 +122,12 @@
 }
 .space-focus .metric b small { font-size: 0.7em; color: var(--gray); font-weight: 500; }
 .space-focus .metric span {
+  display: block;
+  margin-top: 3px;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
+  font-size: 0.58rem;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--gray);
 }
@@ -246,11 +254,13 @@
   text-align: center;
 }
 
-/* A figure set into the story beside its section, turned a little toward you. */
+/* A figure set into the story under its section. Narrower than the text on
+   purpose: it sits lower on the tilted plane, so perspective already makes
+   it read wider than the paragraph above it. */
 .crawl-fig {
   display: block;
-  width: 78%;
-  margin: 0.6rem 0 2.2rem auto;
+  width: 58%;
+  margin: 0.8rem auto 2.4rem;
   padding: 0;
   border: 1px solid var(--btn-border);
   border-radius: var(--inline-radius);
@@ -259,14 +269,11 @@
   overflow: hidden;
   cursor: pointer;
   text-align: left;
-  transform: rotateY(-9deg);
-  transform-origin: 100% 50%;
   transition: border-color 200ms, transform 300ms var(--ease-out-quint);
 }
-.crawl-fig:hover { border-color: var(--accent); transform: rotateY(-4deg); }
+.crawl-fig:hover { border-color: var(--accent); transform: scale(1.02); }
 .crawl-fig img { display: block; width: 100%; height: auto; }
-.crawl-fig .cap,
-.crawl-front .cap {
+.crawl-fig .cap {
   display: block;
   margin: 0;
   padding: 7px 11px;
@@ -279,33 +286,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* The face-on copy that flies from a figure to the centre and back. */
-.crawl-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  background: color-mix(in oklab, var(--bg) 72%, transparent);
-  animation: crawl-in 400ms var(--ease-out-quint) both;
-}
-.crawl-front {
-  position: fixed;
-  z-index: 10;
-  margin: 0;
-  border: 1px solid var(--accent);
-  border-radius: var(--inline-radius);
-  background: var(--surface);
-  box-shadow: var(--shadow-pop);
-  overflow: hidden;
-  cursor: zoom-out;
-  transition:
-    left 640ms var(--ease-out-quint), top 640ms var(--ease-out-quint),
-    width 640ms var(--ease-out-quint), height 640ms var(--ease-out-quint),
-    opacity 300ms;
-}
-.crawl-front[data-back="true"] { opacity: 0; transition-delay: 0s, 0s, 0s, 0s, 340ms; }
-.crawl-front img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.crawl-front .cap { position: absolute; left: 0; right: 0; bottom: 0; }
 
 .crawl-hud {
   position: absolute;
@@ -324,15 +304,35 @@
 }
 .crawl-hud .btn { font-family: var(--font-mono); letter-spacing: 0.08em; }
 
+/* Phones: the readout docks above the scrubber instead of floating under the
+   plate (the stage keeps writing a transform, hence the !importants), the
+   instruments move to the top edge, and the crawl tilts less. */
 @media (max-width: 767px) {
-  .space-focus .metrics { grid-template-columns: repeat(2, 1fr); }
-  .space-hud .hint { display: none; }
-  .crawl-plane { transform: translateX(-50%) rotateX(16deg); }
+  .space-focus {
+    left: 50% !important;
+    top: auto !important;
+    bottom: 4.6rem;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 1.5rem);
+    padding: 0.8rem 0.9rem 0.9rem;
+  }
+  .space-focus .tagline { font-size: 0.86rem; }
+  .space-focus .metrics { grid-template-columns: repeat(4, 1fr); gap: var(--gap-half); }
+  .space-focus .metric b { font-size: 1rem; }
+  .space-focus .metric span { font-size: 0.52rem; }
+  .space-hud .kicker, .space-hud .hint { display: none; }
+  .space-hud .readout { left: auto; right: var(--gap); top: calc(var(--gap) + 0.55rem); bottom: auto; }
+  .space-hud .index { right: auto; left: 50%; transform: translateX(-50%); top: calc(var(--gap) + 0.55rem); bottom: auto; }
+  .space-hud .scrubber { bottom: var(--gap); gap: 7px; }
+  .space-label .name { font-size: 0.95rem; }
+  .space-label[data-focus="true"] .name { font-size: 1.1rem; }
+  .crawl-plane { transform: translateX(-50%) rotateX(16deg); width: 92vw; }
   .crawl-column { font-size: 1.15rem; }
   .crawl-column h2 { font-size: 2.3rem; }
-  .crawl-fig { width: 100%; }
+  .crawl-fig { width: 84%; }
+  .crawl-hud { font-size: 0.62rem; }
+  .crawl-hud > span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .crawl { animation: none; }
-  .crawl-front { transition: none; }
 }
