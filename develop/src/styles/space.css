@@ -274,6 +274,10 @@
 }
 .crawl-fig:hover { border-color: var(--accent); transform: scale(1.02); }
 .crawl-fig img { display: block; width: 100%; height: auto; }
+/* The hero opens the story the way it opens the project page, straight under
+   the tagline, and wider than a section figure because it is the lead picture
+   rather than an illustration of a paragraph. */
+.crawl-hero { width: 76%; margin: 0.4rem auto 2.6rem; }
 .crawl-fig .cap {
   display: block;
   margin: 0;
@@ -332,6 +336,7 @@
   .crawl-column { font-size: 1.15rem; }
   .crawl-column h2 { font-size: 2.3rem; }
   .crawl-fig { width: 84%; }
+  .crawl-hero { width: 94%; }
   .crawl-hud { font-size: 0.62rem; }
   .crawl-hud > span { display: none; }
 }

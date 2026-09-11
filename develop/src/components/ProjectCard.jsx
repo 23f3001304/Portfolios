@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { IMG_DIMS } from '../imageDims.js';
 import { useCardReveal } from '../useCardReveal.js';
+import { cardShot } from '../lib/projectShots.js';
 
 /* One card on the project index. Split out of the page because the WebGL
  * hover reveal is a hook, and a hook cannot be called inside a .map(). */
@@ -12,9 +12,7 @@ export function ProjectCard({ project: p, theme, index }) {
    * screenshot to mush. card-thumbs.mjs resamples it properly at the sizes
    * this page actually paints. Fall back to the hero if a project's
    * derivatives have not been generated yet. */
-  const card = `/projects/${p.slug}/card-${theme}.webp`;
-  const shot = IMG_DIMS[card] ? card : p.hero?.[theme];
-  const half = IMG_DIMS[card] ? card.replace('.webp', '-500.webp') : null;
+  const shot = cardShot(p, theme);
 
   return (
     <Link
@@ -25,15 +23,15 @@ export function ProjectCard({ project: p, theme, index }) {
       {shot && (
         <span className="pbox-media" {...reveal}>
           <img
-            src={shot}
-            srcSet={half ? `${half} 500w, ${shot} 1000w` : undefined}
+            src={shot.src}
+            srcSet={shot.srcSet}
             sizes="(max-width: 46rem) 92vw, 28rem"
             alt=""
             aria-hidden="true"
             loading={index < 4 ? 'eager' : 'lazy'}
             decoding="async"
-            width={IMG_DIMS[shot]?.[0]}
-            height={IMG_DIMS[shot]?.[1]}
+            width={shot.width}
+            height={shot.height}
           />
         </span>
       )}
