@@ -141,13 +141,16 @@ function buildScene(host, theme) {
   const pathPose = (idx, out) => {
     const t = indexToTime(layout, idx);
     // A portrait screen has a narrow horizontal field of view, so the camera
-    // stands further back from the plate the narrower the screen gets.
-    const back = Math.max(1, Math.min(2.6, 1.25 / camera.aspect));
+    // stands further back the narrower the screen gets (the plate fills about
+    // four fifths of the width), and looks lower so the plate sits in the
+    // upper half with the readout docked beneath it.
+    const portrait = camera.aspect < 1;
+    const back = Math.max(1, Math.min(2, 0.9 / camera.aspect));
     const d = R * (1 - CAM_R) * back;
     const cp = helixPoint(t, R - d, pitch, tMin);
     const lp = helixPoint(t, R, pitch, tMin);
     out.pos.set(cp.x, cp.y + CAM_UP * back, cp.z);
-    out.look.set(lp.x, lp.y - 0.35, lp.z); // plate sits high, readout fits below
+    out.look.set(lp.x, lp.y - (portrait ? 1.7 : 0.35), lp.z);
     return out;
   };
 
@@ -265,6 +268,7 @@ export default function SpaceStage({ open }) {
       for (let i = 0; i < w.plates.length; i++) {
         const p = w.plates[i];
         const d = Math.abs(i - travel.t);
+        const portrait = w.camera.aspect < 1;
         const isFocus = i === f && k > 0.6;
         if (isFocus) {
           const q = p.group.quaternion.clone();
@@ -276,7 +280,7 @@ export default function SpaceStage({ open }) {
         }
         const lift = isFocus ? 0.18 : 0;
         p.group.position.y += (p.it.pos.y + lift - p.group.position.y) * 0.12;
-        const dim = k < 0.6 ? 1 : Math.max(0.3, 1 - d * 0.28);
+        const dim = k < 0.6 ? 1 : Math.max(portrait ? 0.18 : 0.3, 1 - d * (portrait ? 0.45 : 0.28));
         p.mat.opacity = dim;
         p.frameMat.color.set(isFocus || i === state.hoverIdx ? w.accentHex() : cssVar('--light-gray'));
         p.frameMat.opacity = isFocus ? 1 : 0.6 * dim;
@@ -284,18 +288,25 @@ export default function SpaceStage({ open }) {
 
       w.renderer.render(w.scene, w.camera);
 
-      // Labels, projected.
+      // Labels, projected. Beside the plate on a wide screen; on a phone only
+      // the focused plate is labelled, centred beneath it.
+      const portrait = w.camera.aspect < 1;
       const right = new THREE.Vector3(PLATE_W / 2 + 0.25, PLATE_H / 2 - 0.15, 0);
+      const below = new THREE.Vector3(0, -PLATE_H / 2 - 0.3, 0);
       for (let i = 0; i < w.plates.length; i++) {
         const el = labelRefs.current[i];
         if (!el) continue;
-        const wp = w.plates[i].group.localToWorld(right.clone());
+        if (portrait && i !== f) { el.style.opacity = '0'; continue; }
+        const wp = w.plates[i].group.localToWorld((portrait ? below : right).clone());
         const s = project(wp);
         const d = Math.abs(i - travel.t);
         const vis = s.behind ? 0 : (k < 0.6 ? 1 : Math.max(0, 1 - d * 0.35));
         el.style.opacity = vis.toFixed(2);
-        el.style.transform = `translate(0, -50%) translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0)`;
+        el.style.transform = portrait
+          ? `translate(-50%, 0) translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0)`
+          : `translate(0, -50%) translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0)`;
         el.dataset.focus = i === f;
+        el.dataset.center = portrait;
       }
       for (let i = 0; i < w.years.length; i++) {
         const el = yearRefs.current[i];

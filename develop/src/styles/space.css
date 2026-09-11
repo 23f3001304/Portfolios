@@ -78,6 +78,7 @@
 .space-label .name { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.015em; }
 .space-label .when { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray); }
 .space-label[data-focus="true"] .name { font-size: 1.35rem; }
+.space-label[data-center="true"] { align-items: center; text-align: center; }
 .space-year {
   position: absolute;
   left: 0; top: 0;
@@ -325,7 +326,8 @@
   .space-hud .index { right: auto; left: 50%; transform: translateX(-50%); top: calc(var(--gap) + 0.55rem); bottom: auto; }
   .space-hud .scrubber { bottom: var(--gap); gap: 7px; }
   .space-label .name { font-size: 0.95rem; }
-  .space-label[data-focus="true"] .name { font-size: 1.1rem; }
+  .space-label[data-focus="true"] .name { font-size: 1.25rem; }
+  .space-year { display: none; }
   .crawl-plane { transform: translateX(-50%) rotateX(16deg); width: 92vw; }
   .crawl-column { font-size: 1.15rem; }
   .crawl-column h2 { font-size: 2.3rem; }
