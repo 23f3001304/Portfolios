@@ -1,3 +1,4 @@
+import { livon } from './livon.js';
 import { saathi } from './saathi.js';
 import { tcursor } from './tcursor.js';
 import { adarag } from './adarag.js';
@@ -20,7 +21,7 @@ import { buildMyOwnShell } from './build-my-own-shell.js';
  * few off the top, so the strongest work stays first. */
 export const projects = [
   // Shipped, with a product shot
-  saathi, tcursor, adarag, contribConsole, typereal, formdash,
+  livon, saathi, tcursor, adarag, contribConsole, typereal, formdash,
   // Design work
   spiderMan, stic, menthub,
   // No screen to photograph - typographic posters (scripts/posters.mjs)

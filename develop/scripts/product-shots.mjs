@@ -85,6 +85,29 @@ const PROJECTS = {
     ring: ['#ef4444', '#f97362', '#ffb4a2', '#8b5cf6'],
     glow: 'rgba(239,68,68,.16)',
   },
+  livon: {
+    // A desktop app like TCursor, so no window bar. Livon ships its own light
+    // feel rather than an inverted dark one, so each backdrop gets the real
+    // screen for its theme through `fileLight`, and `noInvert` keeps either
+    // from being flipped. The two screens are inputs here and figures nowhere, so
+    // they live beside the other raw captures rather than shipping in public/.
+    file: 'scripts/.shots/source/livon-today-dark.png',
+    fileLight: 'scripts/.shots/source/livon-today-light.png',
+    noInvert: true,
+    app: true,
+    noRing: true,
+    chromeLight: '#f3f1e8',
+    light: {
+      bg: 'linear-gradient(118deg,#f1f8dc 0%,#dcefa9 34%,#bfe070 70%,#9ccb3c 100%)',
+      wash: 'radial-gradient(115% 85% at 26% 10%, rgba(252,252,244,.86) 0%, rgba(252,252,244,0) 55%)',
+    },
+    dark: {
+      bg: 'linear-gradient(118deg,#101410 0%,#090b09 55%,#0b100c 100%)',
+      wash: 'radial-gradient(95% 80% at 78% -10%, rgba(132,204,22,.24) 0%, rgba(132,204,22,0) 60%), radial-gradient(70% 60% at 8% 108%, rgba(45,212,191,.14) 0%, rgba(45,212,191,0) 60%)',
+    },
+    ring: ['#84cc16', '#a3e635', '#d9f99d', '#2dd4bf'],
+    glow: 'rgba(132,204,22,.16)',
+  },
   saathi: {
     // The chat landing. Saathi is not deployed - it is a stack you run - so the
     // chrome carries the local origin the README actually tells you to open.
