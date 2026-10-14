@@ -2,15 +2,15 @@ export const tcursor = {
   id: 'PRJ-013',
   slug: 'tcursor',
   name: 'TCursor',
-  tagline: 'A screen recorder that records everything raw and lets you decide the edit afterwards - including the zooms.',
+  tagline: 'A screen recorder that records everything raw and lets you decide the edit later, zooms included.',
   when: 'Jun → Sep 2026',
   status: 'IN PROGRESS',
   stack: ['Rust', 'Tauri v2', 'wgpu', 'Windows Graphics Capture', 'FFmpeg', 'React', 'TypeScript', 'Ollama'],
   metrics: [
-    { value: '3',    unit: '',    label: 'clocks reconciled into one truth' },
+    { value: '3',    unit: '',    label: 'clocks kept in sync' },
     { value: '1.1k', unit: '',    label: 'tests, Rust and TypeScript' },
-    { value: '60',   unit: 'fps', label: 'preview composite' },
-    { value: '200',  unit: '',    label: 'line ceiling per source file' },
+    { value: '60',   unit: 'fps', label: 'live preview' },
+    { value: '200',  unit: '',    label: 'lines max per source file' },
   ],
   sprite: '/oneko/oneko-vaporwave.gif',
   accent: '#ef4444',
@@ -22,16 +22,19 @@ export const tcursor = {
     dark: '/projects/tcursor/product-tilt-dark.webp',
   },
   overview: [
-    'TCursor records your screen and then edits it for you. It captures the picture raw - no zooms baked in, nothing decided at record time - while separately logging every click, keystroke and cursor position with timestamps. The edit is a document you can change forever afterwards: the punch-ins that follow your cursor, the spotlight that dims everything but the thing you are pointing at, the webcam bubble that shrinks when the camera pushes in. None of it is in the file. All of it is replayable.',
-    'That split is the whole design. A recorder that bakes its effects has made a decision you cannot revisit; one that keeps the raw pixels and the event log side by side lets you change your mind at 2am about where the emphasis should have been. The cost is that everything downstream has to agree on when things happened - which is where most of the engineering actually went.',
+    'TCursor records your screen and then edits it for you. It captures the picture raw, with no zooms baked in, and separately logs every click, keystroke and cursor position with timestamps. The edit is a document you can keep changing: zooms that follow your cursor, a spotlight that dims everything except what you point at, a webcam bubble that shrinks when the camera pushes in. None of it is burned into the video, so all of it can be redone.',
+    'A recorder that bakes its effects in has made a decision you cannot take back. Keeping the raw pixels and the event log side by side lets you change your mind later about where the focus should be. The cost is that everything after the recording has to agree on when things happened, and that is where most of my engineering time went.',
   ],
   sections: [
     {
-      title: 'Three clocks, and the file that reconciles them',
-      figure: { id: 'FIG 13.1', caption: 'A zoom region selected - scale, start and end, and the in/out ramps that decide how the punch-in feels.', src: '/projects/tcursor/zoom.png', alt: 'TCursor zoom inspector showing a 2.5x scale slider, start and end times, zoom-in and zoom-out durations, a feel selector and transition curve choices' },
-      body: 'Capture is variable-rate: Windows Graphics Capture hands you a frame when something changed, not on a metronome. So the video has no reliable frame-to-time mapping of its own, and there are three different clocks in play - the raw capture wall clock, the event stream\'s own zero, and the output timeline the editor shows you. A sidecar, sync.json, is the single source of truth that ties them together: the timestamp of every frame actually written, plus the offsets at which the event log, the microphone and the system audio each began.',
+      title: 'Three clocks, and one file that ties them together',
+      figure: { id: 'FIG 13.1', caption: 'A zoom region selected: scale, start and end, and the in and out ramps that decide how the zoom feels.', src: '/projects/tcursor/zoom.png', alt: 'TCursor zoom inspector showing a 2.5x scale slider, start and end times, zoom-in and zoom-out durations, a feel selector and transition curve choices' },
+      body: [
+        'Capture is variable-rate. Windows Graphics Capture gives you a frame when something changes, not at a fixed interval. So the video has no reliable frame-to-time mapping of its own.',
+        'There are three clocks in play: the raw capture wall clock, the event stream\'s own zero, and the output timeline the editor shows. A sidecar file, `sync.json`, ties them together. It stores the timestamp of every frame actually written, plus the offsets where the event log, the microphone and the system audio each started.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'the three time bases, named so they cannot be confused', code: [
+        { kind: 'code', lang: 'js', caption: 'the three time bases, named so they cannot be mixed up', code: [
           't      = raw capture wall clock (ms)',
           'ev_t   = t - events_ms      // mouse, keys, cursor track',
           'out_t  = t - video_start    // the editor timeline; 0 = first frame',
@@ -44,10 +47,14 @@ export const tcursor = {
       ],
     },
     {
-      title: 'Pause was a lie the file told',
-      body: 'Pausing looked fine and was quietly wrong. The audio and the input streams dropped the paused span, sync.json dropped it, but the MP4\'s own presentation timestamps kept running through it - so after a resume the sound and the zooms led the picture by exactly the length of the pause, and the tail got truncated. The fix was to make the encoder timestamp and the sync timestamp come from a single read of one pause-aware ledger, so they are the same number by construction rather than by agreement. On the legacy encoder path, which has no timestamp channel at all, the recording is split into segments and re-joined with per-file duration directives - measured at plus-or-minus zero against a naive join\'s fifty-millisecond drift.',
+      title: 'The pause bug',
+      body: [
+        'Pausing looked fine but was quietly wrong. The audio, the input streams and `sync.json` all dropped the paused span, but the MP4\'s own presentation timestamps kept running through it. So after resuming, the sound and the zooms ran ahead of the picture by exactly the length of the pause, and the end of the video got cut off.',
+        'The fix was to take the encoder timestamp and the sync timestamp from a single read of one pause-aware ledger. Now they are the same number by construction, instead of two numbers that are supposed to match.',
+        'The legacy encoder path has no timestamp channel at all. There, the recording is split into segments and joined back with per-file duration directives. I measured zero drift with this, against about 50 ms with a naive join.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'one ledger read, two consumers - they cannot disagree',
+        { kind: 'code', lang: 'js', caption: 'one ledger read, two consumers',
           code: [
             'let tick = pause_clock.tick(now, paused)?;   // None while paused',
             '',
@@ -61,11 +68,14 @@ export const tcursor = {
       ],
     },
     {
-      title: 'The preview has to be the export',
-      figure: { id: 'FIG 13.2', caption: 'The editor - the AI director on the left, the composited stage in the middle, and every edit as a draggable pill on its own lane.', src: '/projects/tcursor/editor.png', alt: 'TCursor editor showing the AI Director panel, a composited screen recording on a gradient background with a circular webcam bubble, and a timeline with zoom, FX, layout and camera lanes' },
-      body: 'The editor previews at sixty frames a second in a canvas; the export renders through a wgpu compositor with a CPU fallback. Two renderers, one picture - and every place they were allowed to compute the same thing twice, they eventually disagreed. So the rule is that the core logic lives once, in Rust, and the TypeScript side only presents what Rust resolved. Layout positions, camera curves, zoom anchors, spotlight state: all resolved by one function that both the preview command and the export renderer call. Where a mirror is genuinely unavoidable for latency, it is written against the Rust source and pinned by tests that compare the two.',
+      title: 'The preview has to match the export',
+      figure: { id: 'FIG 13.2', caption: 'The editor: the AI director on the left, the composited stage in the middle, and every edit as a draggable pill on its own lane.', src: '/projects/tcursor/editor.png', alt: 'TCursor editor showing the AI Director panel, a composited screen recording on a gradient background with a circular webcam bubble, and a timeline with zoom, FX, layout and camera lanes' },
+      body: [
+        'The editor previews at 60 fps in a canvas, and the export renders through a wgpu compositor with a CPU fallback. Two renderers, one picture. Every time I let them compute the same thing separately, they eventually disagreed.',
+        'So the rule is: core logic lives once, in Rust, and the TypeScript side only displays what Rust resolved. Layout positions, camera curves, zoom anchors and spotlight state are all resolved by one function that both the preview and the export call. Where a TypeScript copy is unavoidable for latency, it is written against the Rust source and pinned by tests that compare the two.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'one resolver, two callers - preview and export cannot drift', code: [
+        { kind: 'code', lang: 'js', caption: 'one resolver, two callers', code: [
           '// Rust: the single definition.',
           'resolve_seg_scene(seg, presets, appearance) -> Scene',
           '',
@@ -78,15 +88,22 @@ export const tcursor = {
       ],
     },
     {
-      title: 'A director that never leaves the machine',
-      body: 'The AI editor reads a transcript of what you actually did - clicks at these moments, typing here, a long idle there - and answers with edit operations: put a zoom on that click, punch the camera in, trim the dead air. It runs against a local Ollama model, so the recording never leaves your computer, and it produces a normal edit document rather than a rendered result. Everything it writes is a pill on the timeline you can drag, retime or delete, and the entire pass is one undo step. It was also the app\'s worst freeze: the calls were synchronous Tauri commands doing blocking HTTP on the main thread, so a first-run model load locked the window for minutes. They are async now, and the planning phase is cancellable while it thinks.',
+      title: 'An AI editor that runs on your machine',
+      body: [
+        'The AI editor reads a transcript of what you did (clicks at these moments, typing here, a long idle there) and replies with edit operations: zoom on that click, push the camera in, trim the dead air. It runs on a local Ollama model, so the recording never leaves your computer.',
+        'It produces a normal edit document, not a rendered video. Everything it writes shows up as a pill on the timeline that you can drag, retime or delete, and the whole pass is one undo step.',
+        'It was also the cause of the app\'s worst freeze. The calls were synchronous Tauri commands doing blocking HTTP on the main thread, so the first model load locked the window for minutes. They are async now, and you can cancel the planning step while it runs.',
+      ],
     },
     {
-      title: 'Arrangements, not a dropdown',
-      figure: { id: 'FIG 13.3', caption: 'A custom arrangement on the layout lane, with the trimmed head striped out and the pills carrying their own schematic.', src: '/projects/tcursor/layout.png', alt: 'TCursor timeline showing custom layout segments, a spotlight region, zoom pills and a trimmed region drawn with diagonal stripes' },
-      body: 'Layout used to be a preset name in a select box, which is a strange way to answer the question "where should the webcam be for these eight seconds". Now a layout segment carries explicit panel poses and you arrange it directly on the stage - drag a panel to move it, a corner to resize it, with snapping to centre, thirds and safe margins, and a modifier to ignore the guides. Presets became one-click starting points rather than the only vocabulary. The poses reuse the same normalised centre-and-size the camera keyframes already used, so keyframes refine an arrangement instead of fighting it, and old documents keep loading untouched: the field is additive, and a project saved before the feature existed re-saves byte-identically.',
+      title: 'Layouts you arrange by hand',
+      figure: { id: 'FIG 13.3', caption: 'A custom arrangement on the layout lane. The trimmed start is striped out, and each pill shows a small sketch of its layout.', src: '/projects/tcursor/layout.png', alt: 'TCursor timeline showing custom layout segments, a spotlight region, zoom pills and a trimmed region drawn with diagonal stripes' },
+      body: [
+        'Layout used to be a preset name in a dropdown, which is a strange way to answer "where should the webcam be for these eight seconds?". Now a layout segment stores explicit panel positions and you arrange it directly on the stage. Drag a panel to move it or a corner to resize it, with snapping to centre, thirds and safe margins, and a modifier key to ignore the guides. Presets are now one-click starting points.',
+        'The positions reuse the normalised centre-and-size format the camera keyframes already used, so keyframes refine an arrangement instead of fighting it. Old projects still load untouched. The new field is optional, and a project saved before this feature re-saves byte for byte the same.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'additive by construction - an old document is unchanged', code: [
+        { kind: 'code', lang: 'js', caption: 'an optional field, so old documents stay unchanged', code: [
           '// Rust',
           'pub struct PanelPose { cx: f32, cy: f32, size: f32 }',
           '',
@@ -100,10 +117,14 @@ export const tcursor = {
       ],
     },
     {
-      title: 'The bugs worth remembering',
-      body: 'Two stand out because neither looked like what it was. The stage background started rendering as a giant mouse cursor stretched across the frame - which turned out to be a race on a fixed temporary filename: every image decode staged its bytes at the same path, so a cursor sprite could overwrite the wallpaper in the milliseconds before FFmpeg read it, and the same race could bake that cursor into an exported video. And recording a browser window would stop and save itself whenever you switched tabs, because the encoder had been sized from a Win32 window rectangle that includes invisible resize margins, and any later mismatch was treated as a fatal display change. Both were found by following the evidence rather than the symptom - decoding the actual bad image and comparing it byte-for-byte against what the background endpoint returned.',
+      title: 'Two bugs worth remembering',
+      body: [
+        'Neither bug looked like its real cause.',
+        '**The giant cursor.** The stage background once rendered as a huge mouse cursor stretched across the frame. The cause was a race on a fixed temporary filename. Every image decode wrote its bytes to the same path, so a cursor sprite could overwrite the wallpaper in the milliseconds before FFmpeg read it, and the same race could bake that cursor into an exported video. I found it by decoding the actual bad image and comparing it byte for byte with what the background endpoint returned.',
+        '**The recording that stopped itself.** Recording a browser window would stop and save whenever you switched tabs. The encoder had been sized from a Win32 window rectangle that includes invisible resize margins, and any later size mismatch was treated as a fatal display change. The fix, borrowed from OBS, keeps one fixed canvas and fits every frame into it.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'the resize answer, borrowed from OBS: fit, never stop', code: [
+        { kind: 'code', lang: 'js', caption: 'the resize fix, borrowed from OBS: fit the frame, never stop', code: [
           '// A window resize is normal. Keep ONE fixed canvas at the',
           '// encoder size and scale each differently-sized frame into',
           '// it, aspect preserved, letterboxed - the way OBS holds a',
@@ -118,13 +139,16 @@ export const tcursor = {
       ],
     },
     {
-      title: 'Constraints that did the work',
-      body: 'Two rules shaped the codebase more than any framework choice. No source file may exceed two hundred lines, which turns "I will split this later" into a build-time decision and has repeatedly forced a genuinely better seam - the pure, testable half of a problem separating from the half that needs a live GPU. And function documentation lives in a parallel docs tree rather than in comments, validated in the same commit as the code, so the prose cannot quietly rot away from what the function does. The animation layer has a similar rule: springs from one motion library, never hand-rolled keyframes, so the whole app moves with one vocabulary.',
+      title: 'Rules that shaped the code',
+      body: [
+        'No source file may go over 200 lines. That turns "I will split this later" into a decision I have to make now, and it has often pushed me to a better split, where the pure, testable half of a problem separates from the half that needs a live GPU.',
+        'Function docs live in a parallel docs tree instead of in comments, and they are checked in the same commit as the code, so they cannot quietly drift away from what the function does. Animation has a similar rule: springs from one motion library and no hand-written keyframes, so the whole app moves the same way.',
+      ],
     },
   ],
   conclusion: [
-    'TCursor is the project where I learned that a recorder is mostly a timekeeping problem wearing a graphics problem\'s clothes. The compositor was the fun part and the easy part. The hard part was that a pause, a tab switch, a monitor change or a dropped frame each quietly put two clocks out of step, and every one of those bugs presented as something else entirely - audio drift, a frozen picture, a recording that stopped on its own.',
-    'What I would defend is the shape of the fixes rather than the features. Timestamps that are the same number by construction instead of by convention. One resolver that both the preview and the export are forced to call. A resize that fits the frame instead of ending the take. The parts of this that are worth anything are the ones where two things can no longer disagree.',
+    'TCursor taught me that a screen recorder is mostly a timekeeping problem that looks like a graphics problem. The compositor was the fun part, and the easy part. The hard part was that a pause, a tab switch, a monitor change or a dropped frame could each put two clocks out of step, and every one of those bugs showed up as something else: audio drift, a frozen picture, a recording that stopped on its own.',
+    'Most of my fixes ended up with the same shape. If two things have to agree, make them come from one source, so they cannot disagree anymore.',
   ],
   figma: null,
   links: [],

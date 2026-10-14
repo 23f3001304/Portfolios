@@ -2,7 +2,7 @@ export const buildMyOwnShell = {
   id: 'PRJ-006',
   slug: 'build-my-own-shell',
   name: 'Build My Own Shell',
-  tagline: 'A POSIX shell in C++ - the read, parse, decide, exec loop behind every $ prompt, built from the syscalls up.',
+  tagline: 'A POSIX shell in C++: the read, parse, decide and exec loop behind every $ prompt, built from the system calls up.',
   when: 'Oct → Nov 2024',
   status: 'ARCHIVED',
   stack: ['C++', 'POSIX', 'fork / exec', 'CMake'],
@@ -22,13 +22,16 @@ export const buildMyOwnShell = {
   },
   heroAlt: 'Poster: a shell prompt and block cursor, over the four syscalls that run behind it',
   overview: [
-    'Build Your Own Shell is the program behind the $ prompt, written from the syscalls up in C++. It reads a line, decides whether the first word is one of its own built-ins or a program living somewhere on `$PATH`, and either handles it in-process or forks a child to run it. No readline, no libraries past the standard library and POSIX.',
-    'The whole thing is a read-eval-print loop. `echo`, `pwd`, `cd`, `cat`, `type`, and `exit` are built in; everything else is resolved by walking `$PATH` and run through `fork` plus `execvp`, with the parent waiting on the child. A hand-written scanner handles the quoting and backslash escapes that make `echo \'a b\'` and `echo a\\ b` come out right.',
+    'This is the program behind the $ prompt, written in C++ from the system calls up. It reads a line and checks whether the first word is one of its own built-ins or a program somewhere on `$PATH`. Then it either handles the command itself or forks a child process to run it. There is no readline and no library beyond the standard library and POSIX.',
+    'The whole thing is a read-eval-print loop. `echo`, `pwd`, `cd`, `cat`, `type` and `exit` are built in. Everything else is found by walking `$PATH` and run with `fork` plus `execvp`, with the parent waiting for the child. A hand-written scanner handles quotes and backslash escapes, so `echo \'a b\'` and `echo a\\ b` come out right.',
   ],
   sections: [
     {
       title: 'A shell is a loop',
-      body: 'Print a prompt, read a line, work out what it means, run it, and come back for the next one. This shell is a literal `while (true)` in `main`: `std::getline` blocks for a line, `exit 0` is the one break condition, and `parse_command` splits the rest into words before anything is dispatched. Output is set unbuffered, so the prompt and a program\'s first bytes never get stuck behind a buffer.',
+      body: [
+        'Print a prompt, read a line, work out what it means, run it, and come back for the next one. In this shell that is a literal `while (true)` in `main`. `std::getline` waits for a line, `exit 0` is the only way out, and `parse_command` splits the rest into words before anything runs.',
+        'Output is unbuffered, so the prompt and a program\'s first bytes never get stuck behind a buffer.',
+      ],
       blocks: [
         { kind: 'diagram', id: 'repl-loop', caption: 'Prompt, read, parse, dispatch, then loop until exit 0.' },
         { kind: 'code', lang: 'cpp', caption: 'main.cpp · the read-eval loop', code: [
@@ -52,10 +55,13 @@ export const buildMyOwnShell = {
       ],
     },
     {
-      title: 'Built-in, or out on PATH?',
-      body: 'The first word decides everything. If it is one of the six built-ins - `echo`, `pwd`, `cd`, `cat`, `type`, `exit` - the shell handles it inside its own process. Otherwise the word is a program name, resolved by walking `$PATH`: split the variable on colons and, for each directory, check whether `dir/command` exists, taking the first hit. The `type` built-in is that same logic turned inside out, reporting whether a name is built in or printing the exact path it would run.',
+      title: 'Built-in, or a program on PATH?',
+      body: [
+        'The first word decides everything. If it is one of the six built-ins, the shell handles it inside its own process. Otherwise it is a program name, found by walking `$PATH`: split the variable on colons and, for each directory, check if `dir/command` exists. The first match wins.',
+        'The `type` built-in is the same logic turned inside out. It tells you whether a name is a built-in, or prints the exact path it would run.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'builtin-dispatch', caption: 'The first word: a built-in handled in process, or a program found on $PATH.' },
+        { kind: 'diagram', id: 'builtin-dispatch', caption: 'The first word is either a built-in handled in process, or a program found on $PATH.' },
         { kind: 'code', lang: 'cpp', caption: 'shell_util.cpp · resolving a command on $PATH', code: [
           '// turn a bare name into a real path by walking $PATH, directory by directory',
           'std::string get_path(std::string command) {',
@@ -72,10 +78,14 @@ export const buildMyOwnShell = {
       ],
     },
     {
-      title: 'Running a program is three syscalls',
-      body: 'Launching an external command is the classic Unix three-step. `fork` clones the process, and that one call returns twice: zero in the new child, the child\'s PID in the parent. The child calls `execvp`, which replaces its own image with the target program and never returns on success; the parent calls `waitpid` and blocks until the child finishes. `execvp` would search `$PATH` itself, but resolving the path first is what lets `type` work and gives a clean `command not found`.',
+      title: 'Running a program takes three system calls',
+      body: [
+        'Launching an external command is the classic Unix three-step. `fork` clones the process, and that one call returns twice: zero in the new child, and the child\'s PID in the parent.',
+        'The child calls `execvp`, which replaces itself with the target program and never returns if it succeeds. The parent calls `waitpid` and waits until the child finishes.',
+        '`execvp` could search `$PATH` by itself, but resolving the path first is what makes `type` work, and it gives a clean `command not found` message.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'fork-exec', caption: 'One fork returns twice: the child execs the program, the parent waits.' },
+        { kind: 'diagram', id: 'fork-exec', caption: 'One fork returns twice: the child execs the program and the parent waits.' },
         { kind: 'code', lang: 'cpp', caption: 'main.cpp · fork, exec, wait', code: [
           'pid_t pid = fork();',
           'if (pid == 0) {                          // child',
@@ -90,8 +100,11 @@ export const buildMyOwnShell = {
       ],
     },
     {
-      title: 'Quoting and escapes, by hand',
-      body: 'Most of a shell\'s surprises live in quoting. `echo \'a   b\'` should keep its spaces; `echo a\\ b` should fold the escaped space into a single argument. A character scanner walks the input, tracking whether it is inside a quote and which kind, stripping the quotes and emitting the literal text inside. What is deliberately not here is the rest of a real shell - pipes, redirection, globbing, job control, history. This is the spine: a loop, a builtin table, a `$PATH` walk, and `fork` plus `exec`.',
+      title: 'Quotes and escapes, by hand',
+      body: [
+        'Most of a shell\'s surprises are in quoting. `echo \'a   b\'` should keep its spaces, and `echo a\\ b` should treat the escaped space as part of one argument. A character scanner walks the input, tracks whether it is inside a quote and which kind, removes the quotes and keeps the literal text inside them.',
+        'What is not here, on purpose, is the rest of a real shell: pipes, redirection, globbing, job control and history. This is the core: a loop, a table of built-ins, a `$PATH` walk, and `fork` plus `exec`.',
+      ],
       blocks: [
         { kind: 'code', lang: 'cpp', caption: 'commands.cpp · quote and escape handling (condensed)', code: [
           '// strip quotes, honour backslash escapes - the fiddly part of any shell',
@@ -112,8 +125,8 @@ export const buildMyOwnShell = {
     },
   ],
   conclusion: [
-    'Build Your Own Shell makes the invisible visible. Every $ prompt runs this exact loop: read, parse, decide built-in or external, and for external, fork a child and exec the program inside it. Strip away pipes and history and what is left is surprisingly small, and surprisingly load-bearing.',
-    'The honest scope is the point. No libraries past the standard one, no parser generator, no readline, just a loop, a handful of built-ins, a `$PATH` walk, and three syscalls. The features a real shell adds next - a pipe, a redirect, a glob - all bolt onto this same read-decide-run spine.',
+    'Building this showed me how small the core of a shell really is. Every $ prompt runs this same loop: read, parse, decide built-in or external, and for external, fork a child and exec the program inside it.',
+    'The features a real shell adds next, like pipes, redirects and globs, would all attach to this same loop.',
   ],
   figma: null,
   links: [

@@ -2,15 +2,15 @@ export const animy = {
   id: 'PRJ-002',
   slug: 'animy',
   name: 'ANIMY',
-  tagline: 'A prompt becomes an animation - an LLM writes Manim, four workers render it, and the browser polls a status map for progress.',
+  tagline: 'Type a prompt, get an animation. An LLM writes Manim code, four workers render it, and the browser polls for progress.',
   when: 'Feb → Aug 2025',
   status: 'COMING SOON',
   stack: ['React', 'Node.js', 'Gemini', 'Manim', 'Cloudflare R2', 'Heroku'],
   metrics: [
-    { value: '4',  unit: '',  label: 'concurrent render workers' },
-    { value: '30', unit: 's', label: 'Heroku router ceiling' },
-    { value: '3',  unit: '',  label: 'self-healing render retries' },
-    { value: '2',  unit: '',  label: 'real-time strategies tried' },
+    { value: '4',  unit: '',  label: 'render workers at once' },
+    { value: '30', unit: 's', label: 'Heroku request timeout' },
+    { value: '3',  unit: '',  label: 'automatic fix-and-retry attempts' },
+    { value: '2',  unit: '',  label: 'progress strategies tried' },
   ],
   sprite: '/oneko/oneko-vaporwave.gif',
   accent: '#8a5cff',
@@ -22,13 +22,16 @@ export const animy = {
   },
   heroAlt: 'Poster: the word ANIMY onion-skinned behind itself, the way a render preview stacks frames',
   overview: [
-    'ANIMY turns a sentence into a short animation. The prompt goes to a language model that writes Manim, the Python animation engine; the server renders that code headlessly into an mp4 and stores the result. The frontend is React - this case study is the Node tier, where one request has to survive a render that takes minutes.',
-    'The spine is small: four workers drain a queue, each running the model-then-render pipeline out of band, while the browser tracks progress by polling a status endpoint. That channel was shaped by two separate constraints - WebSockets cost too much to hold open for every user, and Heroku\'s 30-second request limit ruled out any poll that waits with the connection open - so what is left is short polls that each return a quick status.',
+    'ANIMY turns a sentence into a short animation. The prompt goes to a language model that writes Manim, the Python animation engine. The server renders that code into an mp4 and stores it. The frontend is React, but this writeup is about the Node backend, where one request has to survive a render that takes minutes.',
+    'The core is small. Four workers drain a queue, each running the model-then-render pipeline in the background, while the browser checks progress by polling a status endpoint. Two limits decided that design. WebSockets cost too much to keep open for every user, and Heroku\'s 30-second request limit ruled out any poll that holds the connection open. What was left is short polls that each return a status right away.',
   ],
   sections: [
     {
       title: 'Prompt in, animation out',
-      body: 'ANIMY turns a sentence into a short animation. The prompt goes to Gemini Pro under a system prompt that pins it to Manim, the Python animation engine; the model returns Python, the server writes it to a file and renders it headlessly with `manim -qm`, ffmpeg lifts a thumbnail off the result, and the mp4, thumbnail, and source all land in Cloudflare R2. Each stage updates a status record so the client can narrate what is happening.',
+      body: [
+        'The prompt goes to Gemini Pro with a system prompt that pins it to Manim. The model returns Python, and the server writes it to a file and renders it headlessly with `manim -qm`. Then ffmpeg pulls a thumbnail from the video, and the mp4, the thumbnail and the source code all go to Cloudflare R2.',
+        'Each step updates a status record, so the client can show what is happening.',
+      ],
       blocks: [
         { kind: 'diagram', id: 'animy-pipeline', caption: 'A prompt becomes Manim code, renders to an mp4, and is stored in R2.' },
         { kind: 'code', lang: 'js', caption: 'aiService.js · the model writes Manim, then it renders', code: [
@@ -50,9 +53,12 @@ export const animy = {
     },
     {
       title: 'Four workers and an instant reply',
-      body: 'A render is slow, so the request that starts one cannot wait for it. `POST /generate` validates the prompt, hands the job to a worker if one of four slots is free or pushes it onto a queue, and replies right away with the chat id and a status. The render runs outside the request: each worker is fire-and-forget, and when it settles it frees its slot and pulls the next job off the queue. A bounded pool keeps a burst of prompts from swamping the box, and an `AbortController` per worker makes a job killable mid-render.',
+      body: [
+        'A render is slow, so the request that starts one cannot wait for it. `POST /generate` validates the prompt, gives the job to a worker if one of the four slots is free (or puts it in a queue), and replies right away with the chat id and a status.',
+        'The render runs outside the request. Each worker is fire-and-forget, and when it finishes it frees its slot and takes the next job from the queue. The fixed pool stops a burst of prompts from overloading the server, and an `AbortController` per worker means a job can be killed in the middle of a render.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'animy-workers', caption: 'Generate replies at once; four workers drain the queue, each pulling the next job as it frees up.' },
+        { kind: 'diagram', id: 'animy-workers', caption: 'Generate replies at once. Four workers drain the queue, each taking the next job when it frees up.' },
         { kind: 'code', lang: 'js', caption: 'videoController.js · accept the job, reply at once', code: [
           'const MAX_CONCURRENT_TASKS = 4;',
           'const queue = [];',
@@ -78,10 +84,14 @@ export const animy = {
       ],
     },
     {
-      title: 'WebSockets, polling, and Heroku\'s 30-second router',
-      body: 'Progress needs to reach the browser somehow. WebSockets were the obvious first reach, but they are expensive for this: a warm connection held open for every user, plus the heartbeats, connection state, and reconnection handling that come with it - a lot of standing cost for a job whose real work is the render, not the transport. So the design went with polling instead. That is where Heroku bit: its router kills any request that goes 30 seconds without a first byte (an H12 timeout), so a poll that holds the connection open waiting for the job to move gets cut off mid-wait. The fix was to make every status return at once. Each worker writes progress to an in-memory map keyed by user and chat, and the client polls a status endpoint on an interval that answers in milliseconds with whatever the current state is. Nothing is held open, so the 30-second limit never comes up.',
+      title: 'Why polling, and Heroku\'s 30-second limit',
+      body: [
+        'Progress has to reach the browser somehow. WebSockets were my first idea, but they are expensive here: a connection held open for every user, plus heartbeats, connection state and reconnect handling. That is a lot of standing cost when the real work is the render, not the transport. So I went with polling.',
+        'That is where Heroku bit me. Its router kills any request that goes 30 seconds without sending a first byte (an H12 timeout). So a poll that holds the connection open while it waits for the job to move gets cut off.',
+        'The fix was to make every status request return immediately. Each worker writes its progress to an in-memory map keyed by user and chat, and the client polls a status endpoint on an interval. Each poll is just a map lookup that answers in milliseconds. Nothing is held open, so the 30-second limit never comes up.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'animy-poll', caption: 'A held-open request dies at the 30s wall; short polls of a status map never get close.' },
+        { kind: 'diagram', id: 'animy-poll', caption: 'A request held open dies at 30 seconds. Short polls of a status map never get close.' },
         { kind: 'code', lang: 'js', caption: 'statusService.js · progress is a map the client polls', code: [
           '// progress lives in a plain in-memory map, keyed by user + chat',
           'const chatStatus = {};',
@@ -103,9 +113,12 @@ export const animy = {
     },
     {
       title: 'When the render breaks, the model fixes it',
-      body: 'Model-written code does not always run. When Manim exits with a Python traceback, the server does not give up - it lifts the error box out of stderr, feeds it back to Gemini along with the failing code, and re-renders, up to three times before it reports a failure. The status flips to `fixing` so the browser can say so. It is a small loop, but it turns most first-try syntax slips into a finished video instead of an error.',
+      body: [
+        'Code written by a model does not always run. When Manim exits with a Python traceback, the server pulls the error out of stderr, sends it back to Gemini along with the failing code, and renders again. It tries up to three times before reporting a failure.',
+        'The status changes to `fixing` so the browser can show it. It is a small loop, but it turns most first-try mistakes into a finished video instead of an error.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'js', caption: 'aiService.js · a render error loops back to the model', code: [
+        { kind: 'code', lang: 'js', caption: 'aiService.js · a render error goes back to the model', code: [
           'exec(`manim -qm ${file} Anim_script --media_dir video`, async (err, stdout, stderr) => {',
           '  if (stderr.includes("Traceback") && retryCount < maxRetries) {  // Manim rejected it',
           '    retryCount++;',
@@ -121,8 +134,8 @@ export const animy = {
     },
   ],
   conclusion: [
-    'The shape of ANIMY falls out of one fact: a render outlives any HTTP request you are allowed to hold open. Once you accept that, the rest follows - take the job, return an id, run the work on a bounded pool, and let the client poll a cheap status endpoint. WebSockets lost on cost, and Heroku decided how that polling had to behave: return fast, hold nothing open.',
-    'The simplicity is deliberate. Progress is a plain object, not Redis; the queue is an array, not a broker. On a single web dyno that is enough, and it keeps the whole status path down to a map lookup. Spread across several dynos the map would have to move somewhere shared - the same decision, made again against a new constraint.',
+    'Everything in ANIMY comes from one fact: a render takes longer than any HTTP request you are allowed to keep open. Once I accepted that, the rest followed. Take the job, return an id, run the work on a fixed pool, and let the client poll a cheap status endpoint. WebSockets lost on cost, and Heroku decided how the polling had to behave.',
+    'I kept it simple on purpose. Progress is a plain object, not Redis, and the queue is an array, not a message broker. On a single Heroku dyno that is enough. With several dynos the map would have to move somewhere shared, and that would be the next change.',
   ],
   figma: null,
   links: [

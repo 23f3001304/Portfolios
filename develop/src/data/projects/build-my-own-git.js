@@ -2,14 +2,14 @@ export const buildMyOwnGit = {
   id: 'PRJ-003',
   slug: 'build-my-own-git',
   name: 'Build My Own Git',
-  tagline: 'Git\'s plumbing rebuilt on Node built-ins alone - a content-addressed object store the real git can still read.',
+  tagline: 'Git\'s internals rebuilt with only Node built-ins: a content-addressed object store that real git can still read.',
   when: 'Dec 2024 → Feb 2025',
   status: 'ARCHIVED',
   stack: ['Node.js', 'SHA-1', 'zlib', 'Buffer'],
   metrics: [
     { value: '0',  unit: '', label: 'runtime dependencies' },
     { value: '3',  unit: '', label: 'object types rebuilt' },
-    { value: '40', unit: '', label: 'hex chars per address' },
+    { value: '40', unit: '', label: 'hex characters per address' },
     { value: '8',  unit: '', label: 'plumbing commands' },
   ],
   sprite: '/oneko/oneko-dog.gif',
@@ -22,13 +22,17 @@ export const buildMyOwnGit = {
   },
   heroAlt: 'Poster: the real SHA-1 of a git blob, and the .git/objects path it is stored at',
   overview: [
-    'Build Your Own Git, taken at the plumbing layer: not a wrapper over the `git` binary but a re-implementation of the thing underneath it, the content-addressed object store. Every file, directory, and commit becomes an object named by the SHA-1 of its own contents and written, zlib-deflated, under `.git/objects`.',
-    'It runs on Node built-ins alone - `crypto` for SHA-1, `zlib` for framing, `fs` for the store - and stays close enough to the real format that `git cat-file` reads back the blobs, trees, and commits it produces. A small command-pattern CLI sends each verb to its own class.',
+    'This is the Build Your Own Git challenge, done at the plumbing level. It is not a wrapper around the `git` binary. It re-implements what sits underneath it: the content-addressed object store. Every file, directory and commit becomes an object named by the SHA-1 of its own contents, and is written zlib-compressed under `.git/objects`.',
+    'It uses only Node built-ins (`crypto` for SHA-1, `zlib` for compression and `fs` for the store), and it follows the real format closely enough that `git cat-file` can read back the blobs, trees and commits it writes. A small CLI sends each command to its own class.',
   ],
   sections: [
     {
       title: 'Every object is named by its own hash',
-      body: 'The idea the whole thing rests on: an object\'s name is the SHA-1 of its own content. Git frames each object as a type, a byte length, a NUL byte, then the raw body, hashes that envelope, and writes it to `.git/objects/<first two hex>/<remaining 38>`, zlib-deflated. The two-character directory is a fan-out, so a repository never drops a million objects into one folder. `hash-object` is the smallest command that runs the full loop, and every other write command reuses it.',
+      body: [
+        'This is the idea everything else depends on: an object\'s name is the SHA-1 of its content.',
+        'Git frames each object as a type, a byte length, a NUL byte and then the raw body. It hashes that whole envelope and writes it, compressed, to `.git/objects/<first two hex>/<remaining 38>`. The two-character folder spreads objects out, so a repository never puts a million files in one directory.',
+        '`hash-object` is the smallest command that runs this whole loop, and every other write command reuses it.',
+      ],
       blocks: [
         { kind: 'diagram', id: 'content-address', caption: 'How a blob\'s bytes become an address and a path on disk.' },
         { kind: 'code', lang: 'js', caption: 'hash-write.js', code: [
@@ -44,8 +48,11 @@ export const buildMyOwnGit = {
       ],
     },
     {
-      title: 'A directory folds into a Merkle tree',
-      body: '`write-tree` walks the working directory depth-first. Files turn into blobs; directories turn into tree objects whose entries are `<mode> <name>\\0` followed by the child\'s hash packed as twenty raw bytes, not the forty hex characters you usually see. Because a tree\'s hash depends on its children\'s hashes, a snapshot is a Merkle tree: change one byte in one file and every hash from that file up to the root changes with it. The walk is post-order out of necessity - a parent cannot name a child it has not hashed yet.',
+      title: 'A directory becomes a Merkle tree',
+      body: [
+        '`write-tree` walks the working directory depth first. Files become blobs and directories become tree objects. Each tree entry is `<mode> <name>\\0` followed by the child\'s hash as 20 raw bytes, not the 40 hex characters you usually see.',
+        'Because a tree\'s hash depends on its children\'s hashes, a snapshot is a Merkle tree. Change one byte in one file, and every hash from that file up to the root changes too. The walk has to be post-order, because a parent cannot name a child it has not hashed yet.',
+      ],
       blocks: [
         { kind: 'diagram', id: 'merkle', caption: 'A commit points at a tree that names blobs and sub-trees by hash.' },
         { kind: 'code', lang: 'js', caption: 'write-tree.js (condensed)', code: [
@@ -70,10 +77,13 @@ export const buildMyOwnGit = {
       ],
     },
     {
-      title: 'Commits are snapshots on a chain',
-      body: 'A commit is not special; it is another object under the same rule. Its body names one tree (the snapshot), one parent commit, an author and a committer line carrying a Unix timestamp, a blank line, then the message. Wrap that in a `commit <size>\\0` header and it earns a SHA-1 like every blob and tree. The parent pointer is the whole trick behind history: each commit names the one before it, so a stack of immutable snapshots reads as a timeline.',
+      title: 'A commit is a snapshot in a chain',
+      body: [
+        'A commit is not special. It is just another object under the same rule. Its body names one tree (the snapshot), one parent commit, an author line and a committer line with a Unix timestamp, a blank line, and then the message. Wrap that in a `commit <size>\\0` header and it gets a SHA-1 like every blob and tree.',
+        'The parent pointer is the whole trick behind history. Each commit names the one before it, so a stack of snapshots that never change reads as a timeline.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'commit-chain', caption: 'HEAD to a branch ref to a chain of commits, each naming its parent.' },
+        { kind: 'diagram', id: 'commit-chain', caption: 'HEAD points to a branch ref, which points to a chain of commits, each naming its parent.' },
         { kind: 'code', lang: 'js', caption: 'commit-tree.js', code: [
           'const body = Buffer.concat([',
           '  Buffer.from(`tree ${treeSha}\\n`),',
@@ -87,8 +97,11 @@ export const buildMyOwnGit = {
       ],
     },
     {
-      title: 'Reading the objects back out',
-      body: 'Reading is storing in reverse. Each command reads the object file, inflates it with `zlib`, and splits on the NUL that divides the header from the body. `cat-file -p` prints that body. `ls-tree --name-only` slices a tree\'s entries down to bare filenames. `log` resolves HEAD to its branch ref, inflates the commit there, pulls the parent hash out with a regular expression, and pages back through history one commit at a time, the way Git\'s own log does.',
+      title: 'Reading objects back',
+      body: [
+        'Reading is storing in reverse. Each command reads the object file, inflates it with `zlib`, and splits on the NUL byte between the header and the body. `cat-file -p` prints the body. `ls-tree --name-only` reduces a tree\'s entries to plain filenames.',
+        '`log` resolves HEAD to its branch ref, inflates the commit there, pulls the parent hash out with a regular expression, and walks back through history one commit at a time, the same way Git\'s own log does.',
+      ],
       blocks: [
         { kind: 'code', lang: 'js', caption: 'cat-file.js + log-file.js (the read path)', code: [
           '// cat-file -p: inflate, then drop the "blob <size>\\0" header at the NUL',
@@ -102,10 +115,13 @@ export const buildMyOwnGit = {
       ],
     },
     {
-      title: 'One dispatcher, one class per verb, one honest cheat',
-      body: '`main.js` reads `process.argv`, constructs the command object that matches the verb, and hands it to a `GitClient` whose entire job is to call `run()` on it. Every command is its own class behind that one method, and the program imports nothing from npm: `crypto` for SHA-1, `zlib` for framing, `fs` for the store, all built in. Two gaps are worth naming rather than hiding. `add` hashes a blob instead of keeping a real staging index, and `clone` is the single place the project shells out to the system `git` rather than speaking the pack protocol itself.',
+      title: 'One class per command, and two shortcuts',
+      body: [
+        '`main.js` reads `process.argv`, creates the command object for that verb and passes it to a `GitClient`, whose only job is to call `run()` on it. Every command is its own class behind that one method, and nothing is imported from npm.',
+        'Two gaps are worth being upfront about. `add` hashes a blob instead of keeping a real staging index, and `clone` is the one place where the project shells out to the system `git` instead of speaking the pack protocol itself.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'dispatch', caption: 'argv selects a command class; a four-line client runs it.' },
+        { kind: 'diagram', id: 'dispatch', caption: 'argv picks a command class, and a four-line client runs it.' },
         { kind: 'code', lang: 'js', caption: 'client.js + main.js (dispatch)', code: [
           'class GitClient {',
           '  run(command) { command.run(); }   // the entire dispatcher',
@@ -123,8 +139,8 @@ export const buildMyOwnGit = {
     },
   ],
   conclusion: [
-    'Build Your Own Git is less about the tool than the idea beneath it: a store where a name is a hash of what it holds. Once `hash-object`, `write-tree`, and `commit-tree` agree on one envelope - type, size, NUL, body, deflated - blobs, trees, and commits stop being three features and become one operation pointed at different bytes.',
-    'What sits here is the plumbing, scoped honestly: real objects the official `git` reads back, a Merkle shape that makes tampering show up, and a clear edge around the parts left as shortcuts. The porcelain above it - a staging index, branch management, the pack protocol a real clone speaks - is the next layer, and it would stand on exactly the object store this already builds.',
+    'This project was less about the tool and more about the idea underneath it: a store where an object\'s name is a hash of what it holds. Once `hash-object`, `write-tree` and `commit-tree` agree on one envelope (type, size, NUL, body, compressed), blobs, trees and commits stop being three features. They become one operation on different bytes.',
+    'What is here is the plumbing: real objects that the official `git` reads back, and a Merkle structure where any change shows up. The next layer would be the porcelain, meaning a staging index, branch management and the pack protocol a real clone uses. It would sit on top of the same object store.',
   ],
   figma: null,
   links: [

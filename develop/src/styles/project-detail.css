@@ -2,7 +2,23 @@
    Project detail page - header, metric grid, prose sections,
    figure placeholders, and prev/next nav.
    ============================================================ */
-.proj { display: flex; flex-direction: column; gap: var(--small-gap); }
+.proj { display: flex; flex-direction: column; gap: var(--small-gap); --measure: 42rem; }
+
+/* One reading column. The header, metrics, prose, code and nav share a
+   centred measure of about 75 characters a line, so the text has no side
+   gutter and no ragged empty space next to it. The hero, screenshots and
+   diagrams break out to the full shell width on the same centre line. */
+.proj-header,
+.proj-metrics,
+.proj-overview,
+.proj-nav,
+.proj-section .body > * {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+.proj-section .body > .figure,
+.proj-section .body > .gd { max-width: none; }
 
 .proj-header { display: flex; flex-direction: column; gap: var(--gap); }
 .proj-meta-strip {
@@ -101,45 +117,79 @@
 }
 .proj-metrics .metric-cell .label {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
   color: var(--gray);
-  line-height: 1.5;
+  line-height: 1.45;
   position: relative;
   z-index: 1;
 }
 
-.proj-overview { display: flex; flex-direction: column; gap: var(--gap); }
-.proj-overview p { font-size: 1.0625rem; line-height: 1.6; }
+.proj-overview,
+.proj-section .body { display: flex; flex-direction: column; gap: var(--gap); }
 
-.proj-section {
-  display: grid;
-  grid-template-columns: 8rem 1fr;
-  gap: var(--gap-double);
-  padding-top: var(--gap-double);
+/* Justified, with hyphenation so the word gaps stay even and the column
+   reads as a clean block from edge to edge. */
+.proj-overview p,
+.proj-section .body p {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  text-align: justify;
+  text-justify: inter-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+/* Each section opens with a hairline the width of the text column. */
+.proj-section::before {
+  content: '';
+  display: block;
+  max-width: var(--measure);
+  margin: 0 auto var(--gap-double);
   border-top: 1px solid var(--light-gray);
 }
+
+/* The section number sits just above its title, not in a side gutter. */
 .proj-section .label {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--gray);
   letter-spacing: 0.08em;
-  padding-top: 0.3rem;
+  margin-bottom: calc(var(--gap-half) * -1);
 }
-.proj-section .body { display: flex; flex-direction: column; gap: var(--gap); }
-.proj-section .body p { font-size: 1rem; line-height: 1.6; }
+
+/* Section titles are the page's h2s, so undo the small uppercase label style
+   the home page gives h2 and size them clearly above the body text. */
+.proj-section h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  text-transform: none;
+  color: var(--fg);
+}
+
+.proj-links { display: flex; flex-wrap: wrap; gap: var(--gap-half); }
+
+.proj-overview code,
+.proj-section .body p code {
+  font-size: 0.84em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--fg) 7%, transparent);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.proj-overview strong,
+.proj-section .body p strong { font-weight: 600; }
+
+/* Figures, code listings and diagrams are all <figure>s. Drop the browser's
+   default 40px side margins so they line up with the text column. */
+.proj figure { margin-inline: 0; margin-bottom: 0; }
 
 /* Figure placeholder - quieter */
 .figure { display: flex; flex-direction: column; gap: var(--gap-half); margin-top: var(--gap-half); }
 
-/* Desktop: exhibits break out of the body column and span the full content
-   width - prose keeps the narrow measure, screenshots get the whole shell.
-   (Mobile full-bleed in responsive.css overrides this.) */
-.proj-section .figure,
-.proj-figma .figure {
-  width: calc(100% + 8rem + var(--gap-double));
-  margin-left: calc(-8rem - var(--gap-double));
-}
 .figure .frame {
   position: relative;
   width: 100%;
@@ -183,15 +233,26 @@
   border-radius: 4px;
   opacity: 0.5;
 }
+/* The figure number stays mono; the caption itself is a sentence, so it is
+   set in the text face at a readable size, centred under the picture. */
 .figure .caption {
   display: flex;
+  justify-content: center;
+  align-items: baseline;
   gap: var(--gap-half);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--gray);
+  text-align: center;
+}
+.figure .caption .id {
+  flex: none;
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--gray);
   letter-spacing: 0.02em;
+  color: var(--proj-accent, var(--accent));
 }
-.figure .caption .id { color: var(--accent); }
+.figure .caption > span:last-child { max-width: 38rem; }
 
 /* Real screenshot - same framed, recessed treatment as the placeholder. */
 .figure .frame-img {
@@ -210,20 +271,6 @@
   transform: translate3d(0, -2px, 0);
 }
 
-.proj-figma {
-  display: grid;
-  grid-template-columns: 8rem 1fr;
-  gap: var(--gap-double);
-  padding-top: var(--gap-double);
-  border-top: 1px solid var(--light-gray);
-}
-.proj-figma .label {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--gray);
-  letter-spacing: 0.08em;
-  padding-top: 0.3rem;
-}
 .proj-figma .frame { aspect-ratio: 16 / 10; }
 
 /* ============================================================
@@ -451,12 +498,21 @@
 .gd-svg { display: block; width: 100%; min-width: 600px; height: auto; }
 .gd-cap {
   display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: baseline;
   gap: var(--gap-half);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
   color: var(--gray);
 }
-.gd-cap-id { color: var(--proj-accent, var(--accent)); }
+.gd-cap > span:last-child { max-width: 38rem; }
+.gd-cap-id {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--proj-accent, var(--accent));
+}
 
 /* diagram primitives (SVG) */
 .gd-box { fill: var(--bg); stroke: color-mix(in oklab, var(--fg) 26%, transparent); stroke-width: 1.4; }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLightbox } from '../components/LightboxProvider.jsx';
+import { Prose } from '../components/Prose.jsx';
 import { useTheme } from '../theme.js';
 import { heroShot } from '../lib/projectShots.js';
 
@@ -125,11 +126,11 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
                 />
               </button>
             )}
-            {(p.overview || []).map((t, i) => <p key={`o${i}`}>{t}</p>)}
+            <Prose text={p.overview || []} />
             {(p.sections || []).map((s, i) => (
               <section key={i}>
                 <h3>{s.title}</h3>
-                <p>{s.body}</p>
+                <Prose text={s.body} />
                 {s.figure && (
                   <button
                     type="button"
@@ -148,7 +149,7 @@ export default function SpaceCrawl({ item, onClose, onOpenPage }) {
                 )}
               </section>
             ))}
-            {(p.conclusion || []).map((t, i) => <p key={`c${i}`}>{t}</p>)}
+            <Prose text={p.conclusion || []} />
             <p className="end">end of transmission</p>
           </div>
         </div>
