@@ -26,13 +26,13 @@ export const STATUS = [
  * that belongs is listed. A project can be in several buckets; that is the
  * point of allowing more than one to be selected. */
 export const TECH = [
-  { key: 'ai',      label: 'AI / LLM',   any: ['OpenAI', 'Ollama', 'Gemini', 'Pydantic AI', 'Claude Code', 'bge-m3'] },
+  { key: 'ai',      label: 'AI / LLM',   any: ['OpenAI', 'Ollama', 'Gemini', 'Pydantic AI', 'Claude Code', 'bge-m3', 'Amazon Bedrock', 'YOLO'] },
   { key: 'react',   label: 'React',      any: ['React', 'React 19', 'Next.js 16'] },
   { key: 'ts',      label: 'TypeScript', any: ['TypeScript'] },
   { key: 'node',    label: 'Node',       any: ['Node.js', 'Express', 'Fastify'] },
   { key: 'python',  label: 'Python',     any: ['FastAPI', 'Pydantic AI', 'Optuna'] },
   { key: 'systems', label: 'Systems',    any: ['Rust', 'C++', 'POSIX', 'wgpu', 'Windows Graphics Capture', 'FFmpeg', 'zlib', 'Buffer', 'SHA-1', 'fork / exec', 'CMake'] },
-  { key: 'data',    label: 'Data',       any: ['Postgres', 'PostgreSQL', 'SQLite', 'Prisma', 'Qdrant'] },
+  { key: 'data',    label: 'Data',       any: ['Postgres', 'PostgreSQL', 'SQLite', 'Prisma', 'Qdrant', 'DynamoDB'] },
   { key: 'figma',   label: 'Figma',      any: ['Figma'] },
 ];
 
