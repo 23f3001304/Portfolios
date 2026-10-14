@@ -9,6 +9,7 @@ import { Figure } from '../components/Figure.jsx';
 import { CodeBlock } from '../components/CodeBlock.jsx';
 import { Diagram } from '../components/Diagram.jsx';
 import { ProjectToc } from '../components/ProjectToc.jsx';
+import { Prose } from '../components/Prose.jsx';
 import { projects, projectBySlug } from '../data.js';
 
 // Surface a project's primary external links as quick "visit X" header shortcuts.
@@ -101,21 +102,21 @@ export default function ProjectDetail() {
             <div className="value">
               {m.value}<span className="unit">{m.unit}</span>
             </div>
-            <div className="label">{m.label.toUpperCase()}</div>
+            <div className="label">{m.label}</div>
           </div>
         ))}
       </Reveal>
 
       <Reveal as="section" className="proj-overview" id="overview">
-        {project.overview.map((p, i) => <p key={i}>{p}</p>)}
+        <Prose text={project.overview} />
       </Reveal>
 
       {project.sections.map((s, i) => (
         <Reveal as="section" className="proj-section" key={i} id={`s-${i + 1}`}>
-          <div className="label">{String(i + 1).padStart(2, '0')}</div>
           <div className="body">
-            <h3>{s.title}</h3>
-            <p>{s.body}</p>
+            <div className="label">{String(i + 1).padStart(2, '0')}</div>
+            <h2>{s.title}</h2>
+            <Prose text={s.body} />
             {s.figure && (
               <Figure
                 id={s.figure.id}
@@ -138,9 +139,9 @@ export default function ProjectDetail() {
       ))}
 
       {project.figma && (
-        <Reveal as="section" className="proj-figma" id="figma">
-          <div className="label">FIGMA</div>
-          <div>
+        <Reveal as="section" className="proj-section proj-figma" id="figma">
+          <div className="body">
+            <div className="label">FIGMA</div>
             <Figure
               id={project.figma.id}
               caption={project.figma.caption}
@@ -154,35 +155,37 @@ export default function ProjectDetail() {
 
       {project.conclusion?.length > 0 && (
         <Reveal as="section" className="proj-section" id="conclusion">
-          <div className="label">CONCLUSION</div>
           <div className="body">
-            {project.conclusion.map((p, i) => <p key={i}>{p}</p>)}
+            <h2>Conclusion</h2>
+            <Prose text={project.conclusion} />
           </div>
         </Reveal>
       )}
 
       {project.links?.length > 0 && (
         <Reveal as="section" className="proj-section" id="links">
-          <div className="label">LINKS</div>
-          <div className="body" style={{ flexDirection: 'row', gap: 'var(--gap-half)' }}>
-            {project.links.map((l) => (
-              l.href && l.href !== '#' ? (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn"
-                  style={{ textDecoration: 'none' }}
-                >
-                  {l.label} <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <span key={l.label} className="btn" style={{ cursor: 'default', opacity: 0.6 }}>
-                  {l.label} · soon
-                </span>
-              )
-            ))}
+          <div className="body">
+            <div className="label">LINKS</div>
+            <div className="proj-links">
+              {project.links.map((l) => (
+                l.href && l.href !== '#' ? (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    {l.label} <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <span key={l.label} className="btn" style={{ cursor: 'default', opacity: 0.6 }}>
+                    {l.label} · soon
+                  </span>
+                )
+              ))}
+            </div>
           </div>
         </Reveal>
       )}

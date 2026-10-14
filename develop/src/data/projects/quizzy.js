@@ -2,13 +2,13 @@ export const quizzy = {
   id: 'PRJ-001',
   slug: 'quizzy',
   name: 'Quizzy',
-  tagline: 'An autonomous agent that solves a quiz end to end - a fast planner, a tool-using solver, and a sandbox that runs its own code.',
+  tagline: 'An agent that solves a quiz from start to finish: a fast planner, a solver with tools, and a sandbox that runs its own code.',
   when: 'Nov → Dec 2025',
   status: 'SHIPPED',
   stack: ['FastAPI', 'Pydantic AI', 'Gemini', 'Docker'],
   metrics: [
-    { value: '90', unit: '',     label: 'tools, 12 modules' },
-    { value: '2',  unit: '',     label: 'agents: plan + solve' },
+    { value: '90', unit: '',     label: 'tools across 12 modules' },
+    { value: '2',  unit: '',     label: 'agents: one plans, one solves' },
     { value: '5',  unit: '',     label: 'FastAPI endpoints' },
     { value: '92', unit: '/100', label: 'graded eval score' },
   ],
@@ -22,15 +22,18 @@ export const quizzy = {
   },
   heroAlt: 'Poster: a four-option answer sheet where "all of the above" is the marked answer',
   overview: [
-    'Quizzy is the answer side of a quiz: point it at a starting URL and it solves question after question on its own. A FastAPI service takes the URL, spawns a background task, and runs a two-agent loop - a fast Gemini Flash agent sketches a strategy, then a Gemini Pro agent solves with tools and returns a typed answer that gets submitted automatically.',
-    'Most of the work is the harness around the model: 90 tools across twelve modules (web, data, documents, media, math), a subprocess sandbox that runs Python the agent writes on the fly, and a self-correcting loop that feeds each rejection back into the next attempt. Everything that crosses a layer is a Pydantic contract, and the whole thing containerises into one image.',
+    'Quizzy is the answering side of a quiz. You give it a starting URL and it solves question after question by itself. A FastAPI service takes the URL, starts a background task, and runs a two-agent loop: a fast Gemini Flash agent sketches a plan, then a Gemini Pro agent solves the question with tools and returns a typed answer that gets submitted automatically.',
+    'Most of the work was the harness around the model: 90 tools across twelve modules (web, data, documents, media, maths), a subprocess sandbox that runs Python the agent writes on the fly, and a retry loop that feeds every rejection back into the next attempt. Everything that crosses a layer is a Pydantic model, and the whole thing ships as one Docker image.',
   ],
   sections: [
     {
       title: 'One URL becomes a whole quiz',
-      body: 'Quizzy solves a quiz the way a person would walk it: load the page, work out the answer, submit, and follow the link to the next question. The whole run is one `while` loop in `QuizSolver`. Each turn fetches the page, plans, solves, and submits; a correct answer with a `next_url` advances the chain, a correct answer without one ends it, and a wrong answer drops into a retry. None of it blocks the caller - `/start` checks the secret and hands the loop to a FastAPI background task.',
+      body: [
+        'Quizzy walks a quiz the way a person would: load the page, work out the answer, submit, and follow the link to the next question. The whole run is one `while` loop in `QuizSolver`.',
+        'Each turn fetches the page, plans, solves and submits. A correct answer with a `next_url` moves on to the next question, a correct answer without one ends the quiz, and a wrong answer goes into a retry. None of this blocks the caller: `/start` checks the secret and hands the loop to a FastAPI background task.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'solve-loop', caption: 'The autonomous loop: fetch, plan, solve, submit, then chain or retry.' },
+        { kind: 'diagram', id: 'solve-loop', caption: 'The loop: fetch, plan, solve, submit, then move on or retry.' },
         { kind: 'code', lang: 'py', caption: 'solver.py · the chain loop (condensed)', code: [
           '# walk the question chain until a question has no next_url',
           'while True:',
@@ -51,9 +54,12 @@ export const quizzy = {
     },
     {
       title: 'Plan first, then solve',
-      body: 'Two agents split the work. A cheap Gemini Flash `guidance_agent` reads the question and writes a short strategy - which files to open, what format the answer needs, the usual traps. That strategy is folded into the prompt for the Gemini Pro `quiz_agent`, which does the real solving with tools and is constrained to return a `QuizAnswer`, not free text. Pydantic-AI validates that shape before the answer is ever submitted.',
+      body: [
+        'Two agents split the work. A cheap Gemini Flash `guidance_agent` reads the question and writes a short plan: which files to open, what format the answer needs, and the usual traps.',
+        'That plan goes into the prompt for the Gemini Pro `quiz_agent`, which does the actual solving with tools. It has to return a `QuizAnswer` instead of free text, and Pydantic AI validates that shape before anything gets submitted.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'two-agents', caption: 'A fast planner feeds a strategy to the tool-using solver, which returns a typed answer.' },
+        { kind: 'diagram', id: 'two-agents', caption: 'A fast planner hands a plan to the solver, which uses tools and returns a typed answer.' },
         { kind: 'code', lang: 'py', caption: 'prompts.py · two agents, two models', code: [
           '# fast planner: cheap model, no tools, returns a strategy string',
           'guidance_agent = Agent(',
@@ -75,9 +81,12 @@ export const quizzy = {
     },
     {
       title: 'A tool for every file type',
-      body: 'The solver carries 90 tools across twelve modules - web scraping, JSON and CSV and XML, PDFs and spreadsheets and archives, audio and video and image OCR, hashing, regex, symbolic math. Many of them are thin by design: the tool downloads the file, writes a few lines of Python, and runs them in a subprocess sandbox with a timeout, then hands back stdout. That keeps heavy libraries like pdfplumber and ffprobe out of the request process and gives every risky operation its own bounded, disposable runtime.',
+      body: [
+        'The solver has 90 tools across twelve modules: web scraping, JSON, CSV and XML, PDFs, spreadsheets and archives, audio, video and image OCR, hashing, regex and symbolic maths.',
+        'Many of them are thin on purpose. The tool downloads the file, writes a few lines of Python, runs them in a subprocess sandbox with a timeout, and returns stdout. This keeps heavy libraries like pdfplumber and ffprobe out of the main process, and gives every risky operation its own short-lived runtime that gets thrown away after.',
+      ],
       blocks: [
-        { kind: 'diagram', id: 'tool-belt', caption: 'Tools grouped by modality; the file-heavy ones run generated Python in the sandbox.' },
+        { kind: 'diagram', id: 'tool-belt', caption: 'Tools grouped by file type. The file-heavy ones run generated Python in the sandbox.' },
         { kind: 'code', lang: 'py', caption: 'unified.py · a tool that writes and runs its own code', code: [
           '@quiz_agent.tool',
           'async def process_document(ctx, url: str) -> str:',
@@ -90,10 +99,13 @@ export const quizzy = {
       ],
     },
     {
-      title: 'Wrong answer? Read the feedback, try again',
-      body: 'A wrong answer is not a dead end. When the quiz server rejects a submission it usually says why, and that reason - together with the exact answer that was rejected - gets written straight into the next prompt under a loud retry banner. The agent reads its own miss before trying again, up to a per-question cap, which turns most format mistakes (a date with a stray time, an array where the schema wanted an object) into a second-attempt fix.',
+      title: 'Wrong answer? Read the feedback and try again',
+      body: [
+        'When the quiz server rejects a submission, it usually says why. That reason, along with the exact answer that was rejected, goes straight into the next prompt under a loud retry banner.',
+        'So the agent reads its own mistake before trying again, up to a limit per question. This turns most format mistakes, like a date with a stray time or an array where the schema wanted an object, into a fix on the second attempt.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'py', caption: 'solver.py · the self-correcting retry', code: [
+        { kind: 'code', lang: 'py', caption: 'solver.py · the retry that feeds back the mistake', code: [
           '# on a wrong answer, the rejection becomes part of the next prompt',
           'if context.attempt_number > 0:',
           '    retry_note = (',
@@ -106,10 +118,13 @@ export const quizzy = {
       ],
     },
     {
-      title: 'Typed at every edge, built to never hang',
-      body: 'Everything that crosses a layer is a Pydantic model - `QuizContext` for session state, `QuizDependencies` for what tools may touch, `QuizAnswer` for the model\'s output, `QuizResult` for what gets recorded. The contracts double as guardrails: the agent cannot hand back a shape the rest of the code does not expect. And when the model fails outright, the loop does not stall - a regex fallback covers the common question types, and an emergency submit fires a placeholder just to pull back a `next_url` and keep the chain moving.',
+      title: 'Typed everywhere, and it never hangs',
+      body: [
+        'Everything that crosses a layer is a Pydantic model: `QuizContext` for session state, `QuizDependencies` for what tools can access, `QuizAnswer` for the model\'s output and `QuizResult` for what gets recorded. These types also work as guardrails, because the agent cannot hand back a shape the rest of the code does not expect.',
+        'When the model fails completely, the loop still does not stall. A regex fallback handles the common question types, and an emergency submit sends a placeholder answer just to get the `next_url` back and keep going.',
+      ],
       blocks: [
-        { kind: 'code', lang: 'py', caption: 'models.py + solver.py · typed output, never hang', code: [
+        { kind: 'code', lang: 'py', caption: 'models.py + solver.py · typed output, and a way out when the model fails', code: [
           'class QuizAnswer(BaseModel):                  # the agent must return THIS shape',
           '    answer: Any = Field(..., description="the computed answer")',
           '    submission_url: str',
@@ -126,8 +141,8 @@ export const quizzy = {
     },
   ],
   conclusion: [
-    'Quizzy is less a quiz solver than a small autonomous-agent harness with a quiz for a target. The model is one component; the engineering around it - plan then solve, a typed contract on every edge, a sandbox for code the agent writes itself, and a retry loop that feeds failures back in - is what lets it finish a chain it has never seen.',
-    'The shape generalises past quizzes. Swap the page fetcher and the submit step and the same loop drives any task that is read, decide, act, observe, repeat. What is here is the part that is hard to fake: bounded execution, structured output, and a recovery path for every place the model can go wrong.',
+    'Quizzy ended up being less a quiz solver and more a small agent harness that happens to target quizzes. The model is just one part. Planning before solving, typed contracts on every edge, a sandbox for the code the agent writes, and a retry loop that feeds failures back in are what let it finish a chain of questions it has never seen.',
+    'The same loop works for anything shaped like read, decide, act, check, repeat. Swap the page fetcher and the submit step, and you have a different agent.',
   ],
   figma: null,
   links: [
